@@ -1,31 +1,69 @@
 import { getGMVSummary } from "../engines/summary/gmvSummaryEngine.js";
-import { renderGMVSummary } from "../renderers/summaryRenderer.js";
+import { getCDRSummary } from "../engines/summary/adsSummaryEngine.js";
+import { getCTRSummary } from "../engines/summary/ctrSummaryEngine.js";
+import { renderHomeDashboard } from "../renderers/summaryRenderer.js";
 import { createBarChart } from "../engines/charts/barChartEngine.js";
 import { applyFilters } from "../core/filterEngine.js";
 import { parseDDMMYYYY } from "../core/dateEngine.js";
 
 export function renderHome() {
 
-    const summary = getGMVSummary();
-    renderGMVSummary(summary);
+    const gmv = getGMVSummary();
+    const cdr = getCDRSummary();
+    const ctr = getCTRSummary();
 
-    const data = applyFilters("GMV");
+    renderHomeDashboard(gmv, cdr, ctr);
 
-    const grouped = {};
+    // GMV Trend
+    const gmvData = applyFilters("GMV");
+    const gmvGrouped = {};
 
-    data.forEach(row => {
+    gmvData.forEach(row => {
         const date = row["Order Date"];
         const amount = Number(row["Final Sale Amount"] || 0);
-
-        if (!grouped[date]) grouped[date] = 0;
-        grouped[date] += amount;
+        if (!gmvGrouped[date]) gmvGrouped[date] = 0;
+        gmvGrouped[date] += amount;
     });
 
-    const sortedDates = Object.keys(grouped)
+    const gmvDates = Object.keys(gmvGrouped)
         .sort((a,b) => parseDDMMYYYY(a) - parseDDMMYYYY(b));
 
-    const labels = sortedDates;
-    const values = sortedDates.map(d => grouped[d]);
+    createBarChart("gmv-chart", gmvDates, gmvDates.map(d => gmvGrouped[d]));
 
-    createBarChart("gmv-chart", labels, values);
+    // CDR Trend
+    const cdrData = applyFilters("CDR");
+    const cdrGrouped = {};
+
+    cdrData.forEach(row => {
+        const date = row["Date"];
+        const spend = Number(row["Ad Spend"] || 0);
+        if (!cdrGrouped[date]) cdrGrouped[date] = 0;
+        cdrGrouped[date] += spend;
+    });
+
+    const cdrDates = Object.keys(cdrGrouped)
+        .sort((a,b) => parseDDMMYYYY(a) - parseDDMMYYYY(b));
+
+    createBarChart("cdr-chart", cdrDates, cdrDates.map(d => cdrGrouped[d]));
+
+    // CTR Trend (Net Units)
+    const ctrData = applyFilters("CTR");
+    const ctrGrouped = {};
+
+    ctrData.forEach(row => {
+        const date = row["Order Date"];
+        const type = row["Event Type"];
+        const qty = Number(row["Item Quantity"] || 0);
+
+        if (!ctrGrouped[date]) ctrGrouped[date] = 0;
+
+        if (type === "Sale") ctrGrouped[date] += qty;
+        if (type === "Cancel") ctrGrouped[date] -= qty;
+        if (type === "Return") ctrGrouped[date] -= qty;
+    });
+
+    const ctrDates = Object.keys(ctrGrouped)
+        .sort((a,b) => parseDDMMYYYY(a) - parseDDMMYYYY(b));
+
+    createBarChart("ctr-chart", ctrDates, ctrDates.map(d => ctrGrouped[d]));
 }
