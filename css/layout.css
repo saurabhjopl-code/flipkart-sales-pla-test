@@ -1,54 +1,93 @@
 body {
-    font-family: Inter, sans-serif;
-    background: #f3f4f6;
     margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #f8fafc;
 }
 
-header {
-    background: white;
-    padding: 20px 40px;
-    font-weight: 600;
-    font-size: 18px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
-#filter-bar {
-    background: white;
-    padding: 20px 40px;
+.app {
     display: flex;
-    gap: 30px;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* HEADER */
+
+.app-header {
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    height: 64px;
+    background: #ffffff;
     border-bottom: 1px solid #e5e7eb;
 }
 
-.main-layout {
-    display: flex;
+.logo {
+    font-size: 22px;
 }
 
-aside {
+.title {
+    flex: 1;
+    text-align: center;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.spacer {
+    width: 22px;
+}
+
+/* PROGRESS */
+
+#progress-bar {
+    height: 3px;
+    background: #4f46e5;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* FILTER */
+
+.filter-bar {
+    display: flex;
+    gap: 24px;
+    padding: 16px 32px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* BODY */
+
+.app-body {
+    display: flex;
+    flex: 1;
+}
+
+/* SIDEBAR */
+
+.sidebar {
     width: 240px;
     background: #111827;
     color: #d1d5db;
-    padding: 30px 20px;
-    min-height: 100vh;
+    padding: 24px 20px;
 }
 
-aside div {
-    margin-bottom: 18px;
-    font-weight: 500;
+.sidebar div {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
-aside div:hover {
-    color: white;
+.sidebar div:hover {
+    background: #1f2937;
+    color: #ffffff;
 }
 
-main {
+/* CONTENT */
+
+.content {
     flex: 1;
     padding: 40px;
-}
-
-.card {
-    background: white;
-    border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    overflow-y: auto;
 }
