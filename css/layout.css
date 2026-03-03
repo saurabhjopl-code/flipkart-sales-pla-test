@@ -1,61 +1,54 @@
 body {
     font-family: Inter, sans-serif;
-    background: var(--bg);
+    background: #f3f4f6;
     margin: 0;
-    color: var(--text);
 }
 
 header {
-    background: var(--card-bg);
-    padding: 18px 30px;
-    border-bottom: 1px solid var(--border);
-    font-size: 18px;
+    background: white;
+    padding: 20px 40px;
     font-weight: 600;
-    text-align: center;
-}
-
-#progress-bar {
-    height: 3px;
-    background: var(--primary);
-    width: 0%;
-    transition: width 0.3s ease;
+    font-size: 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 #filter-bar {
-    background: var(--card-bg);
-    padding: 15px 30px;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 5;
+    background: white;
+    padding: 20px 40px;
     display: flex;
-    gap: 20px;
-    align-items: center;
+    gap: 30px;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .main-layout {
     display: flex;
-    height: calc(100vh - 120px);
 }
 
 aside {
     width: 240px;
-    background: var(--sidebar-bg);
-    color: var(--sidebar-text);
+    background: #111827;
+    color: #d1d5db;
     padding: 30px 20px;
+    min-height: 100vh;
 }
 
 aside div {
-    margin-bottom: 15px;
-    cursor: pointer;
+    margin-bottom: 18px;
+    font-weight: 500;
 }
 
 aside div:hover {
-    color: #ffffff;
+    color: white;
 }
 
 main {
     flex: 1;
     padding: 40px;
-    overflow-y: auto;
+}
+
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
 }
