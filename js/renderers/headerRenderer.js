@@ -1,4 +1,5 @@
 export function renderHeader() {
-    document.getElementById("app-header").innerText =
-        "Flipkart Sales & PLA Analytics";
+    const header = document.querySelector(".app-header .title");
+    if (!header) return;
+    header.innerText = "Flipkart Sales & PLA Analytics";
 }
