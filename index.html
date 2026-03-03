@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flipkart Sales & PLA Analytics</title>
 
-    <link rel="icon" href="assets/favicon.ico" />
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="css/reset.css" />
     <link rel="stylesheet" href="css/variables.css" />
     <link rel="stylesheet" href="css/layout.css" />
@@ -13,31 +15,28 @@
 </head>
 <body>
 
-    <div class="app-container">
+<div class="app">
 
-        <!-- HEADER -->
-        <header id="app-header"></header>
+    <header class="app-header">
+        <div class="logo">📊</div>
+        <div class="title">Flipkart Sales & PLA Analytics</div>
+        <div class="spacer"></div>
+    </header>
 
-        <!-- PROGRESS BAR -->
-        <div id="progress-bar"></div>
+    <div id="progress-bar"></div>
 
-        <!-- FILTER BAR -->
-        <div id="filter-bar"></div>
+    <div id="filter-bar" class="filter-bar"></div>
 
-        <!-- MAIN LAYOUT -->
-        <div class="main-layout">
+    <div class="app-body">
 
-            <!-- SIDEBAR -->
-            <aside id="sidebar"></aside>
+        <aside id="sidebar" class="sidebar"></aside>
 
-            <!-- CONTENT -->
-            <main id="app-content"></main>
-
-        </div>
+        <main id="app-content" class="content"></main>
 
     </div>
 
-    <script type="module" src="js/binders/appBinder.js"></script>
+</div>
 
+<script type="module" src="js/binders/appBinder.js"></script>
 </body>
 </html>
