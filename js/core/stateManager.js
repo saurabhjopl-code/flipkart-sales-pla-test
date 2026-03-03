@@ -29,4 +29,4 @@ function notify() {
 }
 meta: {
     accList: []
-},
+}
