@@ -21,8 +21,13 @@ async function init() {
 
     // React to filter changes
     subscribe(() => {
+    const active = document.querySelector(".sidebar div.active");
+    if (active && active.id === "nav-ads") {
+        renderAdsPage();
+    } else {
         renderHome();
-    });
+    }
+});
 }
 
 init();
