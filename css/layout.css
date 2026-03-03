@@ -1,53 +1,61 @@
 body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f9;
+    font-family: Inter, sans-serif;
+    background: var(--bg);
     margin: 0;
-}
-
-.app-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+    color: var(--text);
 }
 
 header {
-    background: #ffffff;
-    padding: 15px 20px;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
+    background: var(--card-bg);
+    padding: 18px 30px;
+    border-bottom: 1px solid var(--border);
     font-size: 18px;
+    font-weight: 600;
+    text-align: center;
 }
 
 #progress-bar {
-    height: 4px;
-    background: #4f46e5;
+    height: 3px;
+    background: var(--primary);
     width: 0%;
     transition: width 0.3s ease;
 }
 
 #filter-bar {
-    background: #ffffff;
-    padding: 10px 20px;
-    border-bottom: 1px solid #ddd;
+    background: var(--card-bg);
+    padding: 15px 30px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    gap: 20px;
+    align-items: center;
 }
 
 .main-layout {
     display: flex;
-    flex: 1;
+    height: calc(100vh - 120px);
 }
 
 aside {
-    width: 220px;
-    background: #1f2937;
+    width: 240px;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 30px 20px;
+}
+
+aside div {
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+aside div:hover {
     color: #ffffff;
-    padding: 20px;
 }
 
 main {
     flex: 1;
-    padding: 20px;
+    padding: 40px;
     overflow-y: auto;
 }
