@@ -6,20 +6,23 @@ export function renderFilters() {
     const { start, end } = getLast30Days();
 
     const container = document.getElementById("filter-bar");
+
     container.innerHTML = `
-        <label>ACC:</label>
-        <input type="text" id="acc-input" placeholder="Comma separated ACC" />
+        <div>
+            <label>ACC</label><br/>
+            <input type="text" id="acc-input" placeholder="Comma separated ACC" />
+        </div>
 
-        <label>Start Date:</label>
-        <input type="date" id="start-date" max="${getTodayISO()}" value="${start}" />
+        <div>
+            <label>Start Date</label><br/>
+            <input type="date" id="start-date" max="${getTodayISO()}" value="${start}" />
+        </div>
 
-        <label>End Date:</label>
-        <input type="date" id="end-date" max="${getTodayISO()}" value="${end}" />
+        <div>
+            <label>End Date</label><br/>
+            <input type="date" id="end-date" max="${getTodayISO()}" value="${end}" />
+        </div>
     `;
-
-    document.getElementById("start-date").addEventListener("change", update);
-    document.getElementById("end-date").addEventListener("change", update);
-    document.getElementById("acc-input").addEventListener("input", update);
 
     function update() {
         const accVal = document.getElementById("acc-input").value;
@@ -31,4 +34,8 @@ export function renderFilters() {
             endDate: document.getElementById("end-date").value
         });
     }
+
+    document.getElementById("acc-input").addEventListener("input", update);
+    document.getElementById("start-date").addEventListener("change", update);
+    document.getElementById("end-date").addEventListener("change", update);
 }
