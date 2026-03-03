@@ -5,19 +5,19 @@ export function renderFilters() {
 
     const container = document.getElementById("filter-bar");
 
-    // SAFE FALLBACK
-    const accList = (STATE.meta && STATE.meta.accList) 
-        ? STATE.meta.accList 
+    const accList = (STATE.meta && STATE.meta.accList)
+        ? STATE.meta.accList
         : [];
 
-    const accOptions = accList
-        .map(acc => `<option value="${acc}">${acc}</option>`)
-        .join("");
+    const accOptions = `
+        <option value="">All Accounts</option>
+        ${accList.map(acc => `<option value="${acc}">${acc}</option>`).join("")}
+    `;
 
     container.innerHTML = `
         <div class="filter-group">
-            <label>Accounts</label>
-            <select id="acc-select" multiple size="4" style="min-width:200px;">
+            <label>Account</label>
+            <select id="acc-select" style="min-width:220px;">
                 ${accOptions}
             </select>
         </div>
@@ -38,12 +38,11 @@ export function renderFilters() {
     `;
 
     function update() {
-        const selected = Array.from(
-            document.getElementById("acc-select").selectedOptions
-        ).map(opt => opt.value);
+
+        const selectedAcc = document.getElementById("acc-select").value;
 
         setFilters({
-            acc: selected,
+            acc: selectedAcc ? [selectedAcc] : [],
             startDate: document.getElementById("start-date").value || null,
             endDate: document.getElementById("end-date").value || null
         });
@@ -54,7 +53,8 @@ export function renderFilters() {
     document.getElementById("end-date").addEventListener("change", update);
 
     document.getElementById("clear-filters").addEventListener("click", () => {
-        document.getElementById("acc-select").selectedIndex = -1;
+
+        document.getElementById("acc-select").value = "";
         document.getElementById("start-date").value = "";
         document.getElementById("end-date").value = "";
 
@@ -65,7 +65,7 @@ export function renderFilters() {
         });
     });
 
-    // Default state
+    // Default: All accounts
     setFilters({
         acc: [],
         startDate: null,
