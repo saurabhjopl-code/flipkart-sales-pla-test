@@ -4,6 +4,7 @@ import { renderFilters } from "../renderers/filterRenderer.js";
 import { loadAllData } from "../core/dataLoader.js";
 import { subscribe } from "../core/stateManager.js";
 import { renderHome } from "./homeBinder.js";
+import { renderAdsPage } from "./adsBinder.js";
 
 async function init() {
 
@@ -20,13 +21,14 @@ async function init() {
     renderHome();
 
     // React to filter changes
-    subscribe(() => {
-    const active = document.querySelector(".sidebar div.active");
-    if (active && active.id === "nav-ads") {
+subscribe(() => {
+
+    if (STATE.ui.activePage === "ads") {
         renderAdsPage();
     } else {
         renderHome();
     }
+
 });
 }
 
