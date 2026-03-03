@@ -1,1 +1,53 @@
-/* Layout Styles */
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f9;
+    margin: 0;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+header {
+    background: #ffffff;
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#progress-bar {
+    height: 4px;
+    background: #4f46e5;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+#filter-bar {
+    background: #ffffff;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.main-layout {
+    display: flex;
+    flex: 1;
+}
+
+aside {
+    width: 220px;
+    background: #1f2937;
+    color: #ffffff;
+    padding: 20px;
+}
+
+main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
