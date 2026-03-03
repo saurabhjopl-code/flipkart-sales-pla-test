@@ -16,7 +16,8 @@ export const STATE = {
         accList: []
     },
     ui: {
-        activePage: "home"
+        activePage: "home",
+        adsSubPage: "campaign"
     },
     listeners: []
 };
@@ -32,6 +33,11 @@ export function setMeta(newMeta) {
 
 export function setActivePage(page) {
     STATE.ui.activePage = page;
+}
+
+export function setAdsSubPage(subPage) {
+    STATE.ui.adsSubPage = subPage;
+    notify();
 }
 
 export function subscribe(listener) {
