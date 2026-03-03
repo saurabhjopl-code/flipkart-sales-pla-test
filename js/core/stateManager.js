@@ -12,6 +12,9 @@ export const STATE = {
         startDate: null,
         endDate: null
     },
+    meta: {
+        accList: []
+    },
     listeners: []
 };
 
@@ -20,13 +23,14 @@ export function setFilters(newFilters) {
     notify();
 }
 
+export function setMeta(newMeta) {
+    STATE.meta = { ...STATE.meta, ...newMeta };
+}
+
 export function subscribe(listener) {
     STATE.listeners.push(listener);
 }
 
 function notify() {
     STATE.listeners.forEach(fn => fn());
-}
-meta: {
-    accList: []
 }
