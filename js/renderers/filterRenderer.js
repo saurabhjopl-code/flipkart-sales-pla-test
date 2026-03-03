@@ -5,7 +5,12 @@ export function renderFilters() {
 
     const container = document.getElementById("filter-bar");
 
-    const accOptions = STATE.meta.accList
+    // SAFE FALLBACK
+    const accList = (STATE.meta && STATE.meta.accList) 
+        ? STATE.meta.accList 
+        : [];
+
+    const accOptions = accList
         .map(acc => `<option value="${acc}">${acc}</option>`)
         .join("");
 
@@ -60,7 +65,7 @@ export function renderFilters() {
         });
     });
 
-    // Default: show all
+    // Default state
     setFilters({
         acc: [],
         startDate: null,
