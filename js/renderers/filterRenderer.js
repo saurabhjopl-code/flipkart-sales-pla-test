@@ -5,39 +5,62 @@ export function renderFilters() {
 
     const container = document.getElementById("filter-bar");
 
+    const accOptions = STATE.meta.accList
+        .map(acc => `<option value="${acc}">${acc}</option>`)
+        .join("");
+
     container.innerHTML = `
-        <div>
-            <label>ACC</label><br/>
-            <input type="text" id="acc-input" placeholder="Comma separated ACC" />
+        <div class="filter-group">
+            <label>Accounts</label>
+            <select id="acc-select" multiple size="4" style="min-width:200px;">
+                ${accOptions}
+            </select>
         </div>
 
-        <div>
-            <label>Start Date</label><br/>
+        <div class="filter-group">
+            <label>Start Date</label>
             <input type="date" id="start-date" max="${getTodayISO()}" />
         </div>
 
-        <div>
-            <label>End Date</label><br/>
+        <div class="filter-group">
+            <label>End Date</label>
             <input type="date" id="end-date" max="${getTodayISO()}" />
+        </div>
+
+        <div class="filter-actions">
+            <button id="clear-filters">Clear</button>
         </div>
     `;
 
     function update() {
-        const accVal = document.getElementById("acc-input").value;
-        const accList = accVal ? accVal.split(",").map(a => a.trim()) : [];
+        const selected = Array.from(
+            document.getElementById("acc-select").selectedOptions
+        ).map(opt => opt.value);
 
         setFilters({
-            acc: accList,
-            startDate: document.getElementById("start-date").value,
-            endDate: document.getElementById("end-date").value
+            acc: selected,
+            startDate: document.getElementById("start-date").value || null,
+            endDate: document.getElementById("end-date").value || null
         });
     }
 
-    document.getElementById("acc-input").addEventListener("input", update);
+    document.getElementById("acc-select").addEventListener("change", update);
     document.getElementById("start-date").addEventListener("change", update);
     document.getElementById("end-date").addEventListener("change", update);
 
-    // IMPORTANT: No default filter → show full data
+    document.getElementById("clear-filters").addEventListener("click", () => {
+        document.getElementById("acc-select").selectedIndex = -1;
+        document.getElementById("start-date").value = "";
+        document.getElementById("end-date").value = "";
+
+        setFilters({
+            acc: [],
+            startDate: null,
+            endDate: null
+        });
+    });
+
+    // Default: show all
     setFilters({
         acc: [],
         startDate: null,
