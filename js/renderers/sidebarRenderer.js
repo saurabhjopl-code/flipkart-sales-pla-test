@@ -1,5 +1,6 @@
 import { renderHome } from "../binders/homeBinder.js";
 import { renderAdsPage } from "../binders/adsBinder.js";
+import { renderGmvPage } from "../binders/gmvBinder.js";
 import { setActivePage } from "../core/stateManager.js";
 
 export function renderSidebar() {
@@ -9,7 +10,7 @@ export function renderSidebar() {
     sidebar.innerHTML = `
         <div id="nav-home">Home</div>
         <div id="nav-ads">Ads</div>
-        <div>GMV</div>
+        <div id="nav-gmv">GMV</div>
         <div>CTR</div>
         <div>Smart Reports</div>
     `;
@@ -22,5 +23,10 @@ export function renderSidebar() {
     document.getElementById("nav-ads").onclick = () => {
         setActivePage("ads");
         renderAdsPage();
+    };
+
+    document.getElementById("nav-gmv").onclick = () => {
+        setActivePage("gmv");
+        renderGmvPage();
     };
 }
