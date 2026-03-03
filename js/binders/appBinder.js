@@ -19,13 +19,11 @@ async function init() {
     renderHome();
 
     subscribe(() => {
-
         if (STATE.ui.activePage === "ads") {
             renderAdsPage();
         } else {
             renderHome();
         }
-
     });
 }
 
