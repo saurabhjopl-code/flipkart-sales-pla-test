@@ -91,3 +91,58 @@ body {
     padding: 40px;
     overflow-y: auto;
 }
+.filter-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 30px;
+    padding: 20px 32px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 13px;
+    background: #f9fafb;
+    transition: all 0.2s ease;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: #4f46e5;
+    background: #ffffff;
+}
+
+.filter-actions {
+    margin-left: auto;
+}
+
+.filter-actions button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: #4f46e5;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.filter-actions button:hover {
+    background: #4338ca;
+}
