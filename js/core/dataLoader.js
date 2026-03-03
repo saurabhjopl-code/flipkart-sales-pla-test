@@ -13,6 +13,7 @@ function parseCSV(text) {
         headers.forEach((h, i) => {
             let val = values[i] || "";
             val = val.replace(/^"|"$/g, "").trim();
+            val = val.replace(/,/g, ""); // remove commas from numbers
             obj[h] = val;
         });
 
