@@ -9,12 +9,17 @@ async function init() {
 
     renderHeader();
     renderSidebar();
-    renderFilters();
 
+    // LOAD DATA FIRST
     await loadAllData();
 
+    // THEN RENDER FILTERS (now accList is ready)
+    renderFilters();
+
+    // THEN RENDER HOME
     renderHome();
 
+    // React to filter changes
     subscribe(() => {
         renderHome();
     });
