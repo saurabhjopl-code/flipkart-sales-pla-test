@@ -3,15 +3,19 @@ import { startProgress, finishProgress } from "./progressEngine.js";
 import { API_CONFIG } from "../config/apiConfig.js";
 
 function parseCSV(text) {
-    const rows = text.trim().split("\n");
+    const rows = text.trim().split(/\r?\n/);
     const headers = rows[0].split(",").map(h => h.trim());
 
     return rows.slice(1).map(row => {
-        const values = row.split(",");
+        const values = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
         const obj = {};
+
         headers.forEach((h, i) => {
-            obj[h] = values[i] ? values[i].trim() : "";
+            let val = values[i] || "";
+            val = val.replace(/^"|"$/g, "").trim();
+            obj[h] = val;
         });
+
         return obj;
     });
 }
