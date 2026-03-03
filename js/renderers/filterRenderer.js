@@ -1,9 +1,7 @@
-import { setFilters } from "../core/stateManager.js";
-import { getLast30Days, getTodayISO } from "../core/dateEngine.js";
+import { setFilters, STATE } from "../core/stateManager.js";
+import { getTodayISO } from "../core/dateEngine.js";
 
 export function renderFilters() {
-
-    const { start, end } = getLast30Days();
 
     const container = document.getElementById("filter-bar");
 
@@ -15,12 +13,12 @@ export function renderFilters() {
 
         <div>
             <label>Start Date</label><br/>
-            <input type="date" id="start-date" max="${getTodayISO()}" value="${start}" />
+            <input type="date" id="start-date" max="${getTodayISO()}" />
         </div>
 
         <div>
             <label>End Date</label><br/>
-            <input type="date" id="end-date" max="${getTodayISO()}" value="${end}" />
+            <input type="date" id="end-date" max="${getTodayISO()}" />
         </div>
     `;
 
@@ -38,4 +36,11 @@ export function renderFilters() {
     document.getElementById("acc-input").addEventListener("input", update);
     document.getElementById("start-date").addEventListener("change", update);
     document.getElementById("end-date").addEventListener("change", update);
+
+    // IMPORTANT: No default filter → show full data
+    setFilters({
+        acc: [],
+        startDate: null,
+        endDate: null
+    });
 }
