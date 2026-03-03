@@ -27,3 +27,6 @@ export function subscribe(listener) {
 function notify() {
     STATE.listeners.forEach(fn => fn());
 }
+meta: {
+    accList: []
+},
