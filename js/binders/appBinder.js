@@ -6,6 +6,7 @@ import { subscribe, STATE } from "../core/stateManager.js";
 
 import { renderHome } from "./homeBinder.js";
 import { renderAdsPage } from "./adsBinder.js";
+import { renderGmvPage } from "./gmvBinder.js";
 
 async function init() {
 
@@ -19,11 +20,11 @@ async function init() {
     renderHome();
 
     subscribe(() => {
-        if (STATE.ui.activePage === "ads") {
-            renderAdsPage();
-        } else {
-            renderHome();
-        }
+
+        if (STATE.ui.activePage === "ads") renderAdsPage();
+        else if (STATE.ui.activePage === "gmv") renderGmvPage();
+        else renderHome();
+
     });
 }
 
