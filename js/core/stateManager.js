@@ -15,6 +15,9 @@ export const STATE = {
     meta: {
         accList: []
     },
+    ui: {
+        activePage: "home"
+    },
     listeners: []
 };
 
@@ -25,6 +28,10 @@ export function setFilters(newFilters) {
 
 export function setMeta(newMeta) {
     STATE.meta = { ...STATE.meta, ...newMeta };
+}
+
+export function setActivePage(page) {
+    STATE.ui.activePage = page;
 }
 
 export function subscribe(listener) {
