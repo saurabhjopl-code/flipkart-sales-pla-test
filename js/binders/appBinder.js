@@ -9,6 +9,7 @@ import { renderAdsPage } from "./adsBinder.js";
 import { renderGmvPage } from "./gmvBinder.js";
 
 import { renderSmartPage } from "./smartBinder.js";
+import { renderCtrPage } from "./ctrBinder.js";
 
 async function init() {
 
