@@ -7,6 +7,7 @@ import { getInventoryRisk } from "../engines/reports/inventoryRiskEngine.js";
 function percent(v){return (v*100).toFixed(2)+"%";}
 function formatINR(n){return "₹ "+Number(n||0).toLocaleString("en-IN");}
 
+
 export function renderSmartPage(){
 
 const container=document.getElementById("app-content");
@@ -274,6 +275,52 @@ ${rows.map(r=>`
 </tbody>
 
 </table>
+function renderInsights(){
+
+const insights=getInsights();
+
+if(!insights.length) return "";
+
+return `
+
+<div class="chart-card" style="margin-bottom:20px">
+
+<div style="font-weight:600;margin-bottom:10px">
+Critical Actions
+</div>
+
+${insights.map(i=>{
+
+let color="#eee";
+let icon="⚠";
+
+if(i.type==="alert"){color="#ffe5e5";icon="🚨";}
+if(i.type==="warning"){color="#fff5d6";icon="⚠";}
+if(i.type==="opportunity"){color="#e8f7e8";icon="🚀";}
+
+return `
+
+<div style="
+background:${color};
+padding:10px;
+border-radius:8px;
+margin-bottom:8px;
+font-size:14px;
+">
+
+${icon} ${i.text}
+
+</div>
+
+`;
+
+}).join("")}
+
+</div>
+
+`;
+
+}
 
 </div>
 `;
