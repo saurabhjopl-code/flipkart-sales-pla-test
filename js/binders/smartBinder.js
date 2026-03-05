@@ -1,6 +1,6 @@
 import { STATE } from "../core/stateManager.js";
 import { getSmartFunnel } from "../engines/reports/smartFunnelEngine.js";
-import { getBrandProfitability } from "../engines/reports/brandProfitabilityEngine.js";
+import { getBrandProfitability } from "../engines/reports/reports/brandProfitabilityEngine.js";
 import { getCampaignEfficiency } from "../engines/reports/campaignEfficiencyEngine.js";
 import { getInventoryRisk } from "../engines/reports/inventoryRiskEngine.js";
 
@@ -21,21 +21,10 @@ container.innerHTML=`
 
 <div class="ads-tabs">
 
-<div class="ads-tab ${STATE.ui.smartSubPage==="funnel"?"active":""}" data-tab="funnel">
-Ads vs Sales Funnel
-</div>
-
-<div class="ads-tab ${STATE.ui.smartSubPage==="brand"?"active":""}" data-tab="brand">
-Brand Profitability
-</div>
-
-<div class="ads-tab ${STATE.ui.smartSubPage==="campaign"?"active":""}" data-tab="campaign">
-Campaign Efficiency
-</div>
-
-<div class="ads-tab ${STATE.ui.smartSubPage==="risk"?"active":""}" data-tab="risk">
-Inventory Risk
-</div>
+<div class="ads-tab ${STATE.ui.smartSubPage==="funnel"?"active":""}" data-tab="funnel">Ads vs Sales Funnel</div>
+<div class="ads-tab ${STATE.ui.smartSubPage==="brand"?"active":""}" data-tab="brand">Brand Profitability</div>
+<div class="ads-tab ${STATE.ui.smartSubPage==="campaign"?"active":""}" data-tab="campaign">Campaign Efficiency</div>
+<div class="ads-tab ${STATE.ui.smartSubPage==="risk"?"active":""}" data-tab="risk">Inventory Risk</div>
 
 </div>
 
@@ -66,28 +55,27 @@ const f=getSmartFunnel();
 c.innerHTML=`
 
 <div class="kpi-row">
-
 <div class="kpi-card"><div class="kpi-label">Views</div><div class="kpi-value">${f.views}</div></div>
 <div class="kpi-card"><div class="kpi-label">Clicks</div><div class="kpi-value">${f.clicks}</div></div>
 <div class="kpi-card"><div class="kpi-label">Ad Units</div><div class="kpi-value">${f.adUnits}</div></div>
 <div class="kpi-card"><div class="kpi-label">Gross Orders</div><div class="kpi-value">${f.grossUnits}</div></div>
 <div class="kpi-card"><div class="kpi-label">Final Sales</div><div class="kpi-value">${f.finalUnits}</div></div>
-
 </div>
 
 <div class="chart-card">
-<div id="funnelChart" class="funnel-chart"></div>
+<canvas id="funnelCanvas" height="320"></canvas>
 </div>
 
 `;
 
-renderFunnelChart(f);
+drawFunnel(f);
 
 }
 
-function renderFunnelChart(f){
+function drawFunnel(f){
 
-const container=document.getElementById("funnelChart");
+const canvas=document.getElementById("funnelCanvas");
+const ctx=canvas.getContext("2d");
 
 const data=[
 {label:"Impressions",value:f.views,color:"#f4b6b6"},
@@ -99,32 +87,42 @@ const data=[
 
 const max=data[0].value;
 
-container.innerHTML=data.map((d,i)=>{
+const width=canvas.width=canvas.parentElement.offsetWidth-40;
+const height=canvas.height;
 
-const width=(d.value/max)*100;
+const stepHeight=height/data.length;
 
-return `
-<div style="
-width:${width}%;
-margin:auto;
-background:${d.color};
-height:70px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 20px;
-margin-bottom:8px;
-border-radius:6px;
-font-weight:600;
-">
+ctx.clearRect(0,0,width,height);
 
-<span>${d.label}</span>
-<span>${Number(d.value).toLocaleString()}</span>
+data.forEach((d,i)=>{
 
-</div>
-`;
+const topWidth=(d.value/max)*width;
+const bottomWidth=(i<data.length-1?(data[i+1].value/max)*width:topWidth*0.7);
 
-}).join("");
+const y=i*stepHeight;
+
+const xTop=(width-topWidth)/2;
+const xBottom=(width-bottomWidth)/2;
+
+ctx.fillStyle=d.color;
+
+ctx.beginPath();
+
+ctx.moveTo(xTop,y);
+ctx.lineTo(xTop+topWidth,y);
+ctx.lineTo(xBottom+bottomWidth,y+stepHeight);
+ctx.lineTo(xBottom,y+stepHeight);
+
+ctx.closePath();
+ctx.fill();
+
+ctx.fillStyle="#333";
+ctx.font="14px Inter";
+
+ctx.fillText(d.label,20,y+stepHeight/2);
+ctx.fillText(Number(d.value).toLocaleString("en-IN"),width-140,y+stepHeight/2);
+
+});
 
 }
 
@@ -134,6 +132,7 @@ const c=document.getElementById("smart-sub-content");
 const brands=getBrandProfitability();
 
 c.innerHTML=`
+
 <div class="chart-card">
 <table class="modern-table">
 
@@ -152,6 +151,7 @@ c.innerHTML=`
 <tbody>
 
 ${brands.map(b=>`
+
 <tr>
 <td>${b.brand}</td>
 <td>${formatINR(b.finalRevenue)}</td>
@@ -164,6 +164,7 @@ ${brands.map(b=>`
 `).join("")}
 
 </tbody>
+
 </table>
 </div>
 `;
@@ -175,6 +176,7 @@ const c=document.getElementById("smart-sub-content");
 const rows=getCampaignEfficiency();
 
 c.innerHTML=`
+
 <div class="chart-card">
 
 <table class="modern-table">
@@ -195,6 +197,7 @@ c.innerHTML=`
 <tbody>
 
 ${rows.map(r=>`
+
 <tr>
 <td>${r.campaign}</td>
 <td>${formatINR(r.spend)}</td>
@@ -221,6 +224,7 @@ const c=document.getElementById("smart-sub-content");
 const rows=getInventoryRisk();
 
 c.innerHTML=`
+
 <div class="chart-card">
 
 <table class="modern-table">
@@ -241,6 +245,7 @@ c.innerHTML=`
 <tbody>
 
 ${rows.map(r=>`
+
 <tr>
 <td>${r.sku}</td>
 <td>${r.orders}</td>
