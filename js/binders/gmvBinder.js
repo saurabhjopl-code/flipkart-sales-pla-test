@@ -3,6 +3,7 @@ import { getGmvOverview } from "../engines/reports/gmvOverviewEngine.js";
 import { getGmvBrandReport } from "../engines/reports/gmvBrandReportEngine.js";
 import { getGmvCategoryReport } from "../engines/reports/gmvCategoryReportEngine.js";
 import { getGmvFulfillmentReport } from "../engines/reports/gmvFulfillmentReportEngine.js";
+import { getGmvLocationReport } from "../engines/reports/gmvLocationReportEngine.js";
 import { renderLineChart } from "../engines/charts/chartFactory.js";
 
 function formatINR(num) {
@@ -28,6 +29,7 @@ export function renderGmvPage() {
                 <div class="ads-tab ${STATE.ui.gmvSubPage === "brand" ? "active" : ""}" data-tab="brand">Brand</div>
                 <div class="ads-tab ${STATE.ui.gmvSubPage === "category" ? "active" : ""}" data-tab="category">Category</div>
                 <div class="ads-tab ${STATE.ui.gmvSubPage === "fulfillment" ? "active" : ""}" data-tab="fulfillment">Fulfillment</div>
+                <div class="ads-tab ${STATE.ui.gmvSubPage === "location" ? "active" : ""}" data-tab="location">Location</div>
             </div>
 
             <div id="gmv-sub-content"></div>
@@ -45,6 +47,7 @@ export function renderGmvPage() {
     if (STATE.ui.gmvSubPage === "brand") renderBrand();
     if (STATE.ui.gmvSubPage === "category") renderCategory();
     if (STATE.ui.gmvSubPage === "fulfillment") renderFulfillment();
+    if (STATE.ui.gmvSubPage === "location") renderLocation();
 }
 
 function renderOverview() {
@@ -75,93 +78,50 @@ function renderOverview() {
 
 function renderBrand() {
 
-    const container = document.getElementById("gmv-sub-content");
     const brands = getGmvBrandReport();
 
-    container.innerHTML = `
-        <div class="chart-card">
-            <table class="modern-table">
-                <thead>
-                    <tr>
-                        <th>Brand</th>
-                        <th>Final Revenue</th>
-                        <th>Gross Units</th>
-                        <th>Cancel Units</th>
-                        <th>Return Units</th>
-                        <th>Cancel %</th>
-                        <th>Return %</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${brands.map(b => `
-                        <tr>
-                            <td>${b.brand}</td>
-                            <td>${formatINR(b.finalRevenue)}</td>
-                            <td>${b.grossUnits}</td>
-                            <td>${b.cancelUnits}</td>
-                            <td>${b.returnUnits}</td>
-                            <td>${percent(b.cancelRate)}</td>
-                            <td>${percent(b.returnRate)}</td>
-                        </tr>
-                    `).join("")}
-                </tbody>
-            </table>
-        </div>
-    `;
+    renderTable(brands, "brand");
 }
 
 function renderCategory() {
 
-    const container = document.getElementById("gmv-sub-content");
     const rows = getGmvCategoryReport();
 
-    container.innerHTML = `
-        <div class="chart-card">
-            <table class="modern-table">
-                <thead>
-                    <tr>
-                        <th>Category</th>
-                        <th>Vertical</th>
-                        <th>Final Revenue</th>
-                        <th>Gross Units</th>
-                        <th>Final Units</th>
-                        <th>Cancel Units</th>
-                        <th>Return Units</th>
-                        <th>Cancel %</th>
-                        <th>Return %</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows.map(r => `
-                        <tr>
-                            <td>${r.category}</td>
-                            <td>${r.vertical}</td>
-                            <td>${formatINR(r.finalRevenue)}</td>
-                            <td>${r.grossUnits}</td>
-                            <td>${r.finalUnits}</td>
-                            <td>${r.cancelUnits}</td>
-                            <td>${r.returnUnits}</td>
-                            <td>${percent(r.cancelRate)}</td>
-                            <td>${percent(r.returnRate)}</td>
-                        </tr>
-                    `).join("")}
-                </tbody>
-            </table>
-        </div>
-    `;
+    renderTable(rows, "category");
 }
 
 function renderFulfillment() {
 
-    const container = document.getElementById("gmv-sub-content");
     const rows = getGmvFulfillmentReport();
+
+    renderTable(rows, "fulfillment");
+}
+
+function renderLocation() {
+
+    const rows = getGmvLocationReport();
+
+    renderTable(rows, "location");
+}
+
+function renderTable(rows, type) {
+
+    const container = document.getElementById("gmv-sub-content");
+
+    let header = "";
+    let nameField = "";
+
+    if (type === "brand") { header = "Brand"; nameField = "brand"; }
+    if (type === "category") { header = "Category / Vertical"; nameField = "category"; }
+    if (type === "fulfillment") { header = "Fulfillment"; nameField = "fulfillment"; }
+    if (type === "location") { header = "Location"; nameField = "location"; }
 
     container.innerHTML = `
         <div class="chart-card">
             <table class="modern-table">
                 <thead>
                     <tr>
-                        <th>Fulfillment</th>
+                        <th>${header}</th>
                         <th>Final Revenue</th>
                         <th>Gross Units</th>
                         <th>Final Units</th>
@@ -174,7 +134,7 @@ function renderFulfillment() {
                 <tbody>
                     ${rows.map(r => `
                         <tr>
-                            <td>${r.fulfillment}</td>
+                            <td>${r[nameField]}</td>
                             <td>${formatINR(r.finalRevenue)}</td>
                             <td>${r.grossUnits}</td>
                             <td>${r.finalUnits}</td>
