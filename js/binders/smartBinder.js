@@ -1,6 +1,6 @@
 import { STATE } from "../core/stateManager.js";
 import { getSmartFunnel } from "../engines/reports/smartFunnelEngine.js";
-import { getBrandProfitability } from "../engines/reports/reports/brandProfitabilityEngine.js";
+import { getBrandProfitability } from "../engines/reports/brandProfitabilityEngine.js";
 import { getCampaignEfficiency } from "../engines/reports/campaignEfficiencyEngine.js";
 import { getInventoryRisk } from "../engines/reports/inventoryRiskEngine.js";
 
