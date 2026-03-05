@@ -2,7 +2,11 @@ import { STATE } from "../../core/stateManager.js";
 
 export function getCtrFulfilment(){
 
-const data = STATE.data.ctr || {};
+const data =
+STATE?.data?.ctr ||
+STATE?.data?.CTR ||
+STATE?.data?.ctrData ||
+[];
 
 const map = {};
 
