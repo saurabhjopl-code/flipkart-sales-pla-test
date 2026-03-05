@@ -25,16 +25,18 @@ export function getSmartFunnel() {
 
     });
 
-    // Orders
+    // Orders (CTR sheet)
     ctr.forEach(r => {
 
-        if (r["Event Type"] === "sale") {
+        const type = (r["Event Type"] || "").toLowerCase();
+
+        if (type === "sale") {
             grossUnits += Number(r["Item Quantity"] || 0);
         }
 
     });
 
-    // Final sales
+    // GMV
     gmv.forEach(r => {
 
         finalUnits += Number(r["Final Sale Units"] || 0);
@@ -46,11 +48,6 @@ export function getSmartFunnel() {
     const ctrRate = views ? clicks / views : 0;
     const adCVR = clicks ? adUnits / clicks : 0;
 
-    const cancelRate = grossUnits ? cancelUnits / grossUnits : 0;
-    const returnRate = grossUnits ? returnUnits / grossUnits : 0;
-
-    const orderLoss = grossUnits - finalUnits;
-
     return {
         views,
         clicks,
@@ -60,9 +57,6 @@ export function getSmartFunnel() {
         cancelUnits,
         returnUnits,
         ctrRate,
-        adCVR,
-        cancelRate,
-        returnRate,
-        orderLoss
+        adCVR
     };
 }
