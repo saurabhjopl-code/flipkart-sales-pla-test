@@ -2,6 +2,7 @@ import { STATE } from "../core/stateManager.js";
 import { getGmvOverview } from "../engines/reports/gmvOverviewEngine.js";
 import { getGmvBrandReport } from "../engines/reports/gmvBrandReportEngine.js";
 import { getGmvCategoryReport } from "../engines/reports/gmvCategoryReportEngine.js";
+import { getGmvFulfillmentReport } from "../engines/reports/gmvFulfillmentReportEngine.js";
 import { renderLineChart } from "../engines/charts/chartFactory.js";
 
 function formatINR(num) {
@@ -26,6 +27,7 @@ export function renderGmvPage() {
                 <div class="ads-tab ${STATE.ui.gmvSubPage === "overview" ? "active" : ""}" data-tab="overview">Overview</div>
                 <div class="ads-tab ${STATE.ui.gmvSubPage === "brand" ? "active" : ""}" data-tab="brand">Brand</div>
                 <div class="ads-tab ${STATE.ui.gmvSubPage === "category" ? "active" : ""}" data-tab="category">Category</div>
+                <div class="ads-tab ${STATE.ui.gmvSubPage === "fulfillment" ? "active" : ""}" data-tab="fulfillment">Fulfillment</div>
             </div>
 
             <div id="gmv-sub-content"></div>
@@ -42,6 +44,7 @@ export function renderGmvPage() {
     if (STATE.ui.gmvSubPage === "overview") renderOverview();
     if (STATE.ui.gmvSubPage === "brand") renderBrand();
     if (STATE.ui.gmvSubPage === "category") renderCategory();
+    if (STATE.ui.gmvSubPage === "fulfillment") renderFulfillment();
 }
 
 function renderOverview() {
@@ -133,6 +136,45 @@ function renderCategory() {
                         <tr>
                             <td>${r.category}</td>
                             <td>${r.vertical}</td>
+                            <td>${formatINR(r.finalRevenue)}</td>
+                            <td>${r.grossUnits}</td>
+                            <td>${r.finalUnits}</td>
+                            <td>${r.cancelUnits}</td>
+                            <td>${r.returnUnits}</td>
+                            <td>${percent(r.cancelRate)}</td>
+                            <td>${percent(r.returnRate)}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+function renderFulfillment() {
+
+    const container = document.getElementById("gmv-sub-content");
+    const rows = getGmvFulfillmentReport();
+
+    container.innerHTML = `
+        <div class="chart-card">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Fulfillment</th>
+                        <th>Final Revenue</th>
+                        <th>Gross Units</th>
+                        <th>Final Units</th>
+                        <th>Cancel Units</th>
+                        <th>Return Units</th>
+                        <th>Cancel %</th>
+                        <th>Return %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows.map(r => `
+                        <tr>
+                            <td>${r.fulfillment}</td>
                             <td>${formatINR(r.finalRevenue)}</td>
                             <td>${r.grossUnits}</td>
                             <td>${r.finalUnits}</td>
