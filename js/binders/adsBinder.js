@@ -4,6 +4,7 @@ import { renderSkuSection } from "./adsSkuBinder.js";
 import { renderPlacementSection } from "./adsPlacementBinder.js";
 import { renderKeywordSection } from "./adsKeywordBinder.js";
 import { renderBlendedSkuSection } from "./adsBlendedSkuBinder.js";
+import { renderAdsOverviewPage } from "./adsOverviewBinder.js";
 
 export function renderAdsPage() {
 
