@@ -208,3 +208,48 @@ ${rows.map(r=>`
 </div>
 `;
 }
+
+
+
+
+
+
+import Chart from "chart.js/auto";
+
+function renderFunnelChart(data){
+
+const ctx=document.getElementById("salesFunnelChart");
+
+new Chart(ctx,{
+type:"bar",
+data:{
+labels:[
+"Impressions",
+"Clicks",
+"Ad Units",
+"Orders",
+"Final Sales"
+],
+datasets:[{
+data:[
+data.views,
+data.clicks,
+data.adUnits,
+data.grossUnits,
+data.finalUnits
+],
+backgroundColor:[
+"#f5b7b1",
+"#f9e79f",
+"#aed6f1",
+"#a3e4d7",
+"#abebc6"
+]
+}]
+},
+options:{
+indexAxis:"y",
+plugins:{legend:{display:false}}
+}
+});
+}
