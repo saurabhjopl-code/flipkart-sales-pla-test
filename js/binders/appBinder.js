@@ -8,6 +8,8 @@ import { renderHome } from "./homeBinder.js";
 import { renderAdsPage } from "./adsBinder.js";
 import { renderGmvPage } from "./gmvBinder.js";
 
+import { renderSmartPage } from "./smartBinder.js";
+
 async function init() {
 
     renderHeader();
@@ -23,6 +25,7 @@ async function init() {
 
         if (STATE.ui.activePage === "ads") renderAdsPage();
         else if (STATE.ui.activePage === "gmv") renderGmvPage();
+        else if (STATE.ui.activePage === "smart") renderSmartPage();
         else renderHome();
 
     });
