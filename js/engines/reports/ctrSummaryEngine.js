@@ -1,12 +1,8 @@
-import { STATE } from "../../core/stateManager.js";
+import { applyFilters } from "../../core/filterEngine.js";
 
 export function getCtrSummary(){
 
-const rows = STATE.rawData.CTR || [];
-
-const accFilter = STATE.ui.acc;
-const startDate = STATE.ui.startDate;
-const endDate = STATE.ui.endDate;
+const data = applyFilters("CTR");
 
 let saleValue = 0;
 let cancelValue = 0;
@@ -16,32 +12,7 @@ let saleOrders = 0;
 let cancelOrders = 0;
 let returnOrders = 0;
 
-rows.forEach(row=>{
-
-const acc = row["ACC"];
-const date = row["Order Date"];
-
-if(!date) return;
-
-/* ACCOUNT FILTER */
-
-if(accFilter && accFilter !== "All Accounts"){
-if(acc !== accFilter) return;
-}
-
-/* DATE FILTER */
-
-const d = new Date(date.split("/").reverse().join("-"));
-
-if(startDate){
-const sd = new Date(startDate);
-if(d < sd) return;
-}
-
-if(endDate){
-const ed = new Date(endDate);
-if(d > ed) return;
-}
+data.forEach(row => {
 
 const type = (row["Event Type"] || "").toLowerCase();
 const price = Number(row["Price before discount"] || 0);
