@@ -22,7 +22,8 @@ export function getInventoryRisk(){
             };
         }
 
-        if(r["Event Type"]==="sale"){
+        const type = (r["Event Type"] || "").toLowerCase();
+        if (type === "sale"){
             map[sku].orders+=Number(r["Item Quantity"]||0);
         }
 
