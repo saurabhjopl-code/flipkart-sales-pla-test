@@ -3,68 +3,68 @@ import { STATE } from "../../core/stateManager.js";
 export function getCtrSummary(){
 
 const rows = STATE.rawData.CTR || [];
-const filters = STATE.filters || {};
 
-let saleValue=0;
-let cancelValue=0;
-let returnValue=0;
+const accFilter = STATE.ui.acc;
+const startDate = STATE.ui.startDate;
+const endDate = STATE.ui.endDate;
 
-let saleOrders=0;
-let cancelOrders=0;
-let returnOrders=0;
+let saleValue = 0;
+let cancelValue = 0;
+let returnValue = 0;
+
+let saleOrders = 0;
+let cancelOrders = 0;
+let returnOrders = 0;
 
 rows.forEach(row=>{
 
-const acc=row["ACC"];
-const date=row["Order Date"];
+const acc = row["ACC"];
+const date = row["Order Date"];
 
 if(!date) return;
 
 /* ACCOUNT FILTER */
-if(filters.account && filters.account!=="All Accounts"){
-if(acc!==filters.account) return;
+
+if(accFilter && accFilter !== "All Accounts"){
+if(acc !== accFilter) return;
 }
 
 /* DATE FILTER */
 
-if(filters.startDate || filters.endDate){
+const d = new Date(date.split("/").reverse().join("-"));
 
-const d=new Date(date.split("/").reverse().join("-"));
-
-if(filters.startDate){
-const sd=new Date(filters.startDate);
-if(d<sd) return;
+if(startDate){
+const sd = new Date(startDate);
+if(d < sd) return;
 }
 
-if(filters.endDate){
-const ed=new Date(filters.endDate);
-if(d>ed) return;
+if(endDate){
+const ed = new Date(endDate);
+if(d > ed) return;
 }
 
-}
+const type = (row["Event Type"] || "").toLowerCase();
+const price = Number(row["Price before discount"] || 0);
 
-const type=(row["Event Type"]||"").toLowerCase();
-const price=Number(row["Price before discount"]||0);
-
-if(type==="sale"){
-saleValue+=price;
+if(type === "sale"){
+saleValue += price;
 saleOrders++;
 }
 
-if(type==="cancel"){
-cancelValue+=price;
+if(type === "cancel"){
+cancelValue += price;
 cancelOrders++;
 }
 
-if(type==="return"){
-returnValue+=price;
+if(type === "return"){
+returnValue += price;
 returnOrders++;
 }
 
 });
 
-const netValue=saleValue-cancelValue-returnValue;
-const netOrders=saleOrders-cancelOrders-returnOrders;
+const netValue = saleValue - cancelValue - returnValue;
+const netOrders = saleOrders - cancelOrders - returnOrders;
 
 return {
 saleValue,
