@@ -12,8 +12,8 @@ export function renderSidebar() {
         <div id="nav-home">Home</div>
         <div id="nav-ads">Ads</div>
         <div id="nav-gmv">GMV</div>
-        <div>CTR</div>
-        <div>Smart Reports</div>
+        <div id="nav-ctr">CTR</div>
+        <div id="nav-smart">Smart Reports</div>
     `;
 
     document.getElementById("nav-home").onclick = () => {
