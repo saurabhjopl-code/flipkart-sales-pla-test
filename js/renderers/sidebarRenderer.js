@@ -2,6 +2,7 @@ import { renderHome } from "../binders/homeBinder.js";
 import { renderAdsPage } from "../binders/adsBinder.js";
 import { renderGmvPage } from "../binders/gmvBinder.js";
 import { setActivePage } from "../core/stateManager.js";
+import { getInsights } from "../engines/insights/insightsEngine.js";
 import { renderSmartPage } from "../binders/smartBinder.js";
 
 export function renderSidebar() {
