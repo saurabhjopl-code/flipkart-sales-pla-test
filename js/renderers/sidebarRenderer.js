@@ -1,9 +1,11 @@
 import { renderHome } from "../binders/homeBinder.js";
 import { renderAdsPage } from "../binders/adsBinder.js";
 import { renderGmvPage } from "../binders/gmvBinder.js";
+import { renderCtrPage } from "../binders/ctrBinder.js";
+import { renderSmartPage } from "../binders/smartBinder.js";
+
 import { setActivePage } from "../core/stateManager.js";
 import { getInsights } from "../engines/insights/insightsEngine.js";
-import { renderSmartPage } from "../binders/smartBinder.js";
 
 export function renderSidebar() {
 
@@ -32,12 +34,14 @@ export function renderSidebar() {
         renderGmvPage();
     };
 
-    document.getElementById("nav-smart").onclick = () => {
-    setActivePage("smart");
-    renderSmartPage();
+    document.getElementById("nav-ctr").onclick = () => {
+        setActivePage("ctr");
+        renderCtrPage();
     };
 
-    document.getElementById("nav-ctr").onclick = () => {
-renderCtrPage();
-};
+    document.getElementById("nav-smart").onclick = () => {
+        setActivePage("smart");
+        renderSmartPage();
+    };
+
 }
