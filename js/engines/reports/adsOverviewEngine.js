@@ -15,19 +15,25 @@ const campaignMap = {};
 
 data.forEach(row=>{
 
-const campaign = row["Campaign Name"] || "Unknown";
+const campaign = row["campaign_name"] || "Unknown";
 
-const adSpend = Number(row["Ad Spend"] || 0);
-const v = Number(row["Views"] || 0);
-const c = Number(row["Clicks"] || 0);
-const u = Number(row["Total Converted Units"] || 0);
-const rev = Number(row["Total Revenue (Rs.)"] || 0);
+/* correct column names */
+
+const adSpend = Number(row["ad_spend"] || 0);
+const v = Number(row["views"] || 0);
+const c = Number(row["clicks"] || 0);
+const u = Number(row["total_converted_units"] || 0);
+const rev = Number(row["total_revenue_(rs.)"] || 0);
+
+/* totals */
 
 spend += adSpend;
 views += v;
 clicks += c;
 units += u;
 revenue += rev;
+
+/* campaign aggregation */
 
 if(!campaignMap[campaign]){
 
@@ -68,6 +74,7 @@ const fixedAds = finalRevenue * 0.03;
 const diff = spend - fixedAds;
 
 return {
+
 summary:{
 spend,
 roi,
@@ -80,7 +87,9 @@ revenue,
 fixedAds,
 diff
 },
+
 campaigns:Object.values(campaignMap)
+
 };
 
 }
