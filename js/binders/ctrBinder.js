@@ -1,7 +1,12 @@
 import { getCtrSummary } from "../engines/reports/ctrSummaryEngine.js";
+import { getCtrFulfilment } from "../engines/reports/ctrFulfilmentEngine.js";
 
 function formatINR(n){
 return "₹ " + Number(n||0).toLocaleString("en-IN");
+}
+
+function percent(v){
+return (v*100).toFixed(2) + "%";
 }
 
 export function renderCtrPage(){
@@ -9,6 +14,7 @@ export function renderCtrPage(){
 const container = document.getElementById("app-content");
 
 const s = getCtrSummary();
+const fulfilment = getCtrFulfilment();
 
 container.innerHTML = `
 
@@ -61,6 +67,48 @@ container.innerHTML = `
 <div class="kpi-label">Net Orders</div>
 <div class="kpi-value">${s.netOrders}</div>
 </div>
+
+</div>
+
+<div class="chart-card">
+
+<div class="section-title" style="margin-bottom:10px">
+Fulfilment Analysis
+</div>
+
+<table class="modern-table">
+
+<thead>
+<tr>
+<th>Fulfilment</th>
+<th>Sale Value</th>
+<th>Cancel Value</th>
+<th>Return Value</th>
+<th>Net Value</th>
+<th>Cancel %</th>
+<th>Return %</th>
+</tr>
+</thead>
+
+<tbody>
+
+${fulfilment.map(r=>`
+
+<tr>
+<td>${r.fulfilment}</td>
+<td>${formatINR(r.saleValue)}</td>
+<td>${formatINR(r.cancelValue)}</td>
+<td>${formatINR(r.returnValue)}</td>
+<td>${formatINR(r.netValue)}</td>
+<td>${percent(r.cancelRate)}</td>
+<td>${percent(r.returnRate)}</td>
+</tr>
+
+`).join("")}
+
+</tbody>
+
+</table>
 
 </div>
 
