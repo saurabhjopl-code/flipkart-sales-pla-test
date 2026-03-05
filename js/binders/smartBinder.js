@@ -64,6 +64,7 @@ const c=document.getElementById("smart-sub-content");
 const f=getSmartFunnel();
 
 c.innerHTML=`
+
 <div class="kpi-row">
 
 <div class="kpi-card"><div class="kpi-label">Views</div><div class="kpi-value">${f.views}</div></div>
@@ -73,7 +74,58 @@ c.innerHTML=`
 <div class="kpi-card"><div class="kpi-label">Final Sales</div><div class="kpi-value">${f.finalUnits}</div></div>
 
 </div>
+
+<div class="chart-card">
+<canvas id="funnelChart"></canvas>
+</div>
+
 `;
+
+renderFunnelChart(f);
+
+}
+
+function renderFunnelChart(f){
+
+const ctx=document.getElementById("funnelChart");
+
+new Chart(ctx,{
+type:"bar",
+data:{
+labels:[
+"Impressions",
+"Clicks",
+"Ad Units",
+"Orders",
+"Final Sales"
+],
+datasets:[{
+data:[
+f.views,
+f.clicks,
+f.adUnits,
+f.grossUnits,
+f.finalUnits
+],
+backgroundColor:[
+"#f4b6b6",
+"#f9d976",
+"#a8c7fa",
+"#a5e3d0",
+"#9ee3a0"
+]
+}]
+},
+options:{
+indexAxis:"y",
+plugins:{legend:{display:false}},
+scales:{
+x:{grid:{display:false}},
+y:{grid:{display:false}}
+}
+}
+});
+
 }
 
 function renderBrand(){
@@ -207,46 +259,4 @@ ${rows.map(r=>`
 
 </div>
 `;
-}
-
-
-
-import Chart from "chart.js/auto";
-
-function renderFunnelChart(data){
-
-const ctx=document.getElementById("salesFunnelChart");
-
-new Chart(ctx,{
-type:"bar",
-data:{
-labels:[
-"Impressions",
-"Clicks",
-"Ad Units",
-"Orders",
-"Final Sales"
-],
-datasets:[{
-data:[
-data.views,
-data.clicks,
-data.adUnits,
-data.grossUnits,
-data.finalUnits
-],
-backgroundColor:[
-"#f5b7b1",
-"#f9e79f",
-"#aed6f1",
-"#a3e4d7",
-"#abebc6"
-]
-}]
-},
-options:{
-indexAxis:"y",
-plugins:{legend:{display:false}}
-}
-});
 }
