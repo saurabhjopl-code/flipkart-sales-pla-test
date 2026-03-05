@@ -65,7 +65,28 @@ function renderInsightsPanel(){
 
 const insights=getInsights();
 
-if(!insights.length) return "";
+if(!insights.length){
+
+return `
+<div class="chart-card" style="margin-bottom:20px">
+
+<div style="font-weight:600;margin-bottom:10px">
+Critical Actions
+</div>
+
+<div style="
+background:#e8f7e8;
+padding:10px;
+border-radius:8px;
+font-size:14px;
+">
+✅ No issues detected. Performance looks healthy.
+</div>
+
+</div>
+`;
+
+}
 
 return `
 
