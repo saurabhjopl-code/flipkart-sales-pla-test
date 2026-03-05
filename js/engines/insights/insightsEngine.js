@@ -4,6 +4,11 @@ export function getInsights(){
 
 const insights=[];
 
+  insights.push({
+type:"warning",
+text:"Insights engine running correctly"
+});
+
 /* SAFE DATA ACCESS */
 const ctr = STATE.data?.ctr || [];
 const cdr = STATE.data?.cdr || [];
