@@ -63,7 +63,7 @@ c.innerHTML=`
 </div>
 
 <div class="chart-card">
-<canvas id="funnelCanvas" height="320"></canvas>
+<canvas id="funnelCanvas" height="360"></canvas>
 </div>
 
 `;
@@ -78,16 +78,16 @@ const canvas=document.getElementById("funnelCanvas");
 const ctx=canvas.getContext("2d");
 
 const data=[
-{label:"Impressions",value:f.views,color:"#f4b6b6"},
-{label:"Clicks",value:f.clicks,color:"#f9d976"},
-{label:"Ad Units",value:f.adUnits,color:"#a8c7fa"},
-{label:"Orders",value:f.grossUnits,color:"#a5e3d0"},
-{label:"Final Sales",value:f.finalUnits,color:"#9ee3a0"}
+{label:"Impressions",value:f.views,color:"#f6b3b3"},
+{label:"Clicks",value:f.clicks,color:"#f5d98e"},
+{label:"Ad Units",value:f.adUnits,color:"#a9c9ff"},
+{label:"Orders",value:f.grossUnits,color:"#9fd8c3"},
+{label:"Final Sales",value:f.finalUnits,color:"#8ed39f"}
 ];
 
 const max=data[0].value;
 
-const width=canvas.width=canvas.parentElement.offsetWidth-40;
+const width=canvas.width=canvas.parentElement.offsetWidth-60;
 const height=canvas.height;
 
 const stepHeight=height/data.length;
@@ -97,7 +97,7 @@ ctx.clearRect(0,0,width,height);
 data.forEach((d,i)=>{
 
 const topWidth=(d.value/max)*width;
-const bottomWidth=(i<data.length-1?(data[i+1].value/max)*width:topWidth*0.7);
+const bottomWidth=(i<data.length-1?(data[i+1].value/max)*width:topWidth*0.75);
 
 const y=i*stepHeight;
 
@@ -116,11 +116,24 @@ ctx.lineTo(xBottom,y+stepHeight);
 ctx.closePath();
 ctx.fill();
 
-ctx.fillStyle="#333";
-ctx.font="14px Inter";
+ctx.fillStyle="#222";
+ctx.font="600 14px Inter";
+ctx.textAlign="center";
 
-ctx.fillText(d.label,20,y+stepHeight/2);
-ctx.fillText(Number(d.value).toLocaleString("en-IN"),width-140,y+stepHeight/2);
+const label=d.label+"  "+Number(d.value).toLocaleString("en-IN");
+
+ctx.fillText(label,width/2,y+stepHeight/2+5);
+
+if(i>0){
+
+const prev=data[i-1].value;
+const rate=((d.value/prev)*100).toFixed(1);
+
+ctx.font="12px Inter";
+ctx.fillStyle="#777";
+ctx.fillText(rate+"% conversion",width/2,y+2);
+
+}
 
 });
 
