@@ -1,5 +1,6 @@
 import { getCtrSummary } from "../engines/reports/ctrSummaryEngine.js";
 import { getCtrFulfilment } from "../engines/reports/ctrFulfilmentEngine.js";
+import { getCtrOrders } from "../engines/reports/ctrOrdersEngine.js";
 
 function formatINR(n){
 return "₹ " + Number(n||0).toLocaleString("en-IN");
@@ -15,6 +16,7 @@ const container = document.getElementById("app-content");
 
 const s = getCtrSummary();
 const fulfilment = getCtrFulfilment();
+const orders = getCtrOrders();
 
 container.innerHTML = `
 
@@ -102,6 +104,44 @@ ${fulfilment.map(r=>`
 <td>${formatINR(r.netValue)}</td>
 <td>${percent(r.cancelRate)}</td>
 <td>${percent(r.returnRate)}</td>
+</tr>
+
+`).join("")}
+
+</tbody>
+
+</table>
+
+</div>
+
+<div class="chart-card">
+
+<div class="section-title" style="margin-bottom:10px">
+Order Events
+</div>
+
+<table class="modern-table">
+
+<thead>
+<tr>
+<th>Date</th>
+<th>SKU</th>
+<th>Event</th>
+<th>Fulfilment</th>
+<th>Price</th>
+</tr>
+</thead>
+
+<tbody>
+
+${orders.map(r=>`
+
+<tr>
+<td>${r.date}</td>
+<td>${r.sku}</td>
+<td>${r.type}</td>
+<td>${r.fulfilment}</td>
+<td>${formatINR(r.price)}</td>
 </tr>
 
 `).join("")}
