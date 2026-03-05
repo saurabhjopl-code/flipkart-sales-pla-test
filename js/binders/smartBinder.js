@@ -3,10 +3,10 @@ import { getSmartFunnel } from "../engines/reports/smartFunnelEngine.js";
 import { getBrandProfitability } from "../engines/reports/brandProfitabilityEngine.js";
 import { getCampaignEfficiency } from "../engines/reports/campaignEfficiencyEngine.js";
 import { getInventoryRisk } from "../engines/reports/inventoryRiskEngine.js";
+import { getInsights } from "../engines/insights/insightsEngine.js";
 
 function percent(v){return (v*100).toFixed(2)+"%";}
 function formatINR(n){return "₹ "+Number(n||0).toLocaleString("en-IN");}
-
 
 export function renderSmartPage(){
 
@@ -22,12 +22,25 @@ container.innerHTML=`
 
 <div class="ads-tabs">
 
-<div class="ads-tab ${STATE.ui.smartSubPage==="funnel"?"active":""}" data-tab="funnel">Ads vs Sales Funnel</div>
-<div class="ads-tab ${STATE.ui.smartSubPage==="brand"?"active":""}" data-tab="brand">Brand Profitability</div>
-<div class="ads-tab ${STATE.ui.smartSubPage==="campaign"?"active":""}" data-tab="campaign">Campaign Efficiency</div>
-<div class="ads-tab ${STATE.ui.smartSubPage==="risk"?"active":""}" data-tab="risk">Inventory Risk</div>
+<div class="ads-tab ${STATE.ui.smartSubPage==="funnel"?"active":""}" data-tab="funnel">
+Ads vs Sales Funnel
+</div>
+
+<div class="ads-tab ${STATE.ui.smartSubPage==="brand"?"active":""}" data-tab="brand">
+Brand Profitability
+</div>
+
+<div class="ads-tab ${STATE.ui.smartSubPage==="campaign"?"active":""}" data-tab="campaign">
+Campaign Efficiency
+</div>
+
+<div class="ads-tab ${STATE.ui.smartSubPage==="risk"?"active":""}" data-tab="risk">
+Inventory Risk
+</div>
 
 </div>
+
+${renderInsightsPanel()}
 
 <div id="smart-sub-content"></div>
 
@@ -48,6 +61,53 @@ if(STATE.ui.smartSubPage==="risk") renderRisk();
 
 }
 
+function renderInsightsPanel(){
+
+const insights=getInsights();
+
+if(!insights.length) return "";
+
+return `
+
+<div class="chart-card" style="margin-bottom:20px">
+
+<div style="font-weight:600;margin-bottom:10px">
+Critical Actions
+</div>
+
+${insights.map(i=>{
+
+let color="#eee";
+let icon="⚠";
+
+if(i.type==="alert"){color="#ffe5e5";icon="🚨";}
+if(i.type==="warning"){color="#fff5d6";icon="⚠";}
+if(i.type==="opportunity"){color="#e8f7e8";icon="🚀";}
+
+return `
+
+<div style="
+background:${color};
+padding:10px;
+border-radius:8px;
+margin-bottom:8px;
+font-size:14px;
+">
+
+${icon} ${i.text}
+
+</div>
+
+`;
+
+}).join("")}
+
+</div>
+
+`;
+
+}
+
 function renderFunnel(){
 
 const c=document.getElementById("smart-sub-content");
@@ -56,11 +116,13 @@ const f=getSmartFunnel();
 c.innerHTML=`
 
 <div class="kpi-row">
+
 <div class="kpi-card"><div class="kpi-label">Views</div><div class="kpi-value">${f.views}</div></div>
 <div class="kpi-card"><div class="kpi-label">Clicks</div><div class="kpi-value">${f.clicks}</div></div>
 <div class="kpi-card"><div class="kpi-label">Ad Units</div><div class="kpi-value">${f.adUnits}</div></div>
 <div class="kpi-card"><div class="kpi-label">Gross Orders</div><div class="kpi-value">${f.grossUnits}</div></div>
 <div class="kpi-card"><div class="kpi-label">Final Sales</div><div class="kpi-value">${f.finalUnits}</div></div>
+
 </div>
 
 <div class="chart-card">
@@ -108,12 +170,10 @@ const xBottom=(width-bottomWidth)/2;
 ctx.fillStyle=d.color;
 
 ctx.beginPath();
-
 ctx.moveTo(xTop,y);
 ctx.lineTo(xTop+topWidth,y);
 ctx.lineTo(xBottom+bottomWidth,y+stepHeight);
 ctx.lineTo(xBottom,y+stepHeight);
-
 ctx.closePath();
 ctx.fill();
 
@@ -275,52 +335,6 @@ ${rows.map(r=>`
 </tbody>
 
 </table>
-function renderInsights(){
-
-const insights=getInsights();
-
-if(!insights.length) return "";
-
-return `
-
-<div class="chart-card" style="margin-bottom:20px">
-
-<div style="font-weight:600;margin-bottom:10px">
-Critical Actions
-</div>
-
-${insights.map(i=>{
-
-let color="#eee";
-let icon="⚠";
-
-if(i.type==="alert"){color="#ffe5e5";icon="🚨";}
-if(i.type==="warning"){color="#fff5d6";icon="⚠";}
-if(i.type==="opportunity"){color="#e8f7e8";icon="🚀";}
-
-return `
-
-<div style="
-background:${color};
-padding:10px;
-border-radius:8px;
-margin-bottom:8px;
-font-size:14px;
-">
-
-${icon} ${i.text}
-
-</div>
-
-`;
-
-}).join("")}
-
-</div>
-
-`;
-
-}
 
 </div>
 `;
