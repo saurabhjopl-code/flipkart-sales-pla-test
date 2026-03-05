@@ -1,28 +1,64 @@
+import { STATE } from "../core/stateManager.js";
 import { getCtrSummary } from "../engines/reports/ctrSummaryEngine.js";
 import { getCtrFulfilment } from "../engines/reports/ctrFulfilmentEngine.js";
-import { getCtrOrders } from "../engines/reports/ctrOrdersEngine.js";
+import { getCtrTrend } from "../engines/reports/ctrTrendEngine.js";
 
 function formatINR(n){
-return "₹ " + Number(n||0).toLocaleString("en-IN");
+return "₹ " + Number(n || 0).toLocaleString("en-IN");
 }
 
 function percent(v){
-return (v*100).toFixed(2) + "%";
+return (v * 100).toFixed(2) + "%";
 }
 
 export function renderCtrPage(){
 
 const container = document.getElementById("app-content");
 
-const s = getCtrSummary();
-const fulfilment = getCtrFulfilment();
-const orders = getCtrOrders();
+if(!STATE.ui.ctrTab) STATE.ui.ctrTab = "performance";
 
 container.innerHTML = `
 
 <div class="section">
 
-<div class="section-title">CTR - Order Performance</div>
+<div class="section-title">CTR Analytics</div>
+
+<div class="ads-tabs">
+
+<div class="ads-tab ${STATE.ui.ctrTab==="performance"?"active":""}" data-tab="performance">
+Order Performance
+</div>
+
+<div class="ads-tab ${STATE.ui.ctrTab==="fulfilment"?"active":""}" data-tab="fulfilment">
+Fulfilment Analysis
+</div>
+
+</div>
+
+<div id="ctr-content"></div>
+
+</div>
+`;
+
+document.querySelectorAll(".ads-tab").forEach(tab=>{
+tab.onclick=()=>{
+STATE.ui.ctrTab = tab.dataset.tab;
+renderCtrPage();
+};
+});
+
+if(STATE.ui.ctrTab==="performance") renderPerformance();
+if(STATE.ui.ctrTab==="fulfilment") renderFulfilment();
+
+}
+
+function renderPerformance(){
+
+const c = document.getElementById("ctr-content");
+
+const s = getCtrSummary();
+
+c.innerHTML = `
 
 <div class="kpi-row">
 
@@ -73,10 +109,82 @@ container.innerHTML = `
 </div>
 
 <div class="chart-card">
-
-<div class="section-title" style="margin-bottom:10px">
-Fulfilment Analysis
+<canvas id="ctrTrendChart"></canvas>
 </div>
+`;
+
+renderTrendChart();
+
+}
+
+function renderTrendChart(){
+
+const data = getCtrTrend();
+
+const ctx = document.getElementById("ctrTrendChart");
+
+new Chart(ctx,{
+type:"line",
+data:{
+labels:data.labels,
+datasets:[
+
+{
+label:"Sales",
+data:data.sales,
+borderColor:"#2563eb",
+backgroundColor:"transparent",
+tension:0.3
+},
+
+{
+label:"Cancel",
+data:data.cancel,
+borderColor:"#dc2626",
+backgroundColor:"transparent",
+tension:0.3
+},
+
+{
+label:"Return",
+data:data.return,
+borderColor:"#f59e0b",
+backgroundColor:"transparent",
+tension:0.3
+},
+
+{
+label:"Net",
+data:data.net,
+borderColor:"#16a34a",
+backgroundColor:"transparent",
+tension:0.3
+}
+
+]
+},
+options:{
+responsive:true,
+plugins:{
+legend:{position:"top"}
+},
+scales:{
+y:{beginAtZero:true}
+}
+}
+});
+
+}
+
+function renderFulfilment(){
+
+const c = document.getElementById("ctr-content");
+
+const rows = getCtrFulfilment();
+
+c.innerHTML = `
+
+<div class="chart-card">
 
 <table class="modern-table">
 
@@ -94,8 +202,7 @@ Fulfilment Analysis
 
 <tbody>
 
-${fulfilment.map(r=>`
-
+${rows.map(r=>`
 <tr>
 <td>${r.fulfilment}</td>
 <td>${formatINR(r.saleValue)}</td>
@@ -105,52 +212,11 @@ ${fulfilment.map(r=>`
 <td>${percent(r.cancelRate)}</td>
 <td>${percent(r.returnRate)}</td>
 </tr>
-
 `).join("")}
 
 </tbody>
 
 </table>
-
-</div>
-
-<div class="chart-card">
-
-<div class="section-title" style="margin-bottom:10px">
-Order Events
-</div>
-
-<table class="modern-table">
-
-<thead>
-<tr>
-<th>Date</th>
-<th>SKU</th>
-<th>Event</th>
-<th>Fulfilment</th>
-<th>Price</th>
-</tr>
-</thead>
-
-<tbody>
-
-${orders.map(r=>`
-
-<tr>
-<td>${r.date}</td>
-<td>${r.sku}</td>
-<td>${r.type}</td>
-<td>${r.fulfilment}</td>
-<td>${formatINR(r.price)}</td>
-</tr>
-
-`).join("")}
-
-</tbody>
-
-</table>
-
-</div>
 
 </div>
 
