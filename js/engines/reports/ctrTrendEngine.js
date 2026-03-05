@@ -3,12 +3,29 @@ import { STATE } from "../../core/stateManager.js";
 export function getCtrTrend(){
 
 const rows = STATE.rawData.CTR || [];
+const filters = STATE.filters || {};
 
 const map = {};
 
 rows.forEach(r=>{
 
-const date = r["Order Date"];
+const acc = r["ACC"] || "";
+const date = r["Order Date"] || "";
+
+/* ACCOUNT FILTER */
+if(filters.acc && filters.acc !== "All Accounts"){
+if(acc !== filters.acc) return;
+}
+
+/* DATE FILTER */
+if(filters.startDate){
+if(new Date(date.split("/").reverse().join("-")) < new Date(filters.startDate)) return;
+}
+
+if(filters.endDate){
+if(new Date(date.split("/").reverse().join("-")) > new Date(filters.endDate)) return;
+}
+
 const type = (r["Event Type"] || "").trim();
 const value = Number(r["Price before discount"] || 0);
 
