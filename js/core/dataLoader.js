@@ -17,9 +17,7 @@ headers.forEach((h,i)=>{
 let val = values[i] || "";
 val = val.replace(/^"|"$/g,"").trim();
 
-const num = Number(val.replace(/,/g,""));
-
-obj[h] = isNaN(num) ? val : num;
+obj[h] = val;
 
 });
 
@@ -42,7 +40,7 @@ function buildACCList(){
 
 const accSet = new Set();
 
-Object.values(STATE.data).forEach(sheet=>{
+Object.values(STATE.rawData).forEach(sheet=>{
 
 sheet.forEach(row=>{
 
@@ -66,17 +64,21 @@ export async function loadAllData(){
 
 startProgress();
 
-const keys = Object.keys(API_CONFIG);
-
-const results = await Promise.all(
-keys.map(key => loadCSV(API_CONFIG[key]))
-);
-
+/* ensure rawData exists */
+STATE.rawData = {};
 STATE.data = {};
 
-keys.forEach((key,i)=>{
-STATE.data[key.toLowerCase()] = results[i];
-});
+for(const key in API_CONFIG){
+
+const data = await loadCSV(API_CONFIG[key]);
+
+/* keep old structure (engines depend on this) */
+STATE.rawData[key] = data;
+
+/* also keep normalized structure */
+STATE.data[key.toLowerCase()] = data;
+
+}
 
 buildACCList();
 
