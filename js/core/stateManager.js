@@ -17,7 +17,7 @@ export const STATE = {
     },
     ui: {
         activePage: "home",
-        adsSubPage: "campaign"
+        adsSubPage: "overview"
     },
     listeners: []
 };
