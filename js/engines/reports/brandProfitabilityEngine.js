@@ -5,37 +5,44 @@ export function getBrandProfitability() {
     const gmv = applyFilters("GMV");
     const cfr = applyFilters("CFR");
 
+    const skuBrand = {};
     const map = {};
 
-    // GMV aggregation
+    // Build SKU → Brand map
     gmv.forEach(r => {
 
+        const sku = r["SKU ID"];
         const brand = r["Brand"] || "Unknown";
 
+        skuBrand[sku] = brand;
+
         if (!map[brand]) {
+
             map[brand] = {
                 brand,
                 finalRevenue: 0,
-                cancelUnits: 0,
-                returnUnits: 0,
+                adRevenue: 0,
                 grossUnits: 0,
-                adRevenue: 0
+                cancelUnits: 0,
+                returnUnits: 0
             };
+
         }
 
         map[brand].finalRevenue += Number(r["Final Sale Amount"] || 0);
+        map[brand].grossUnits += Number(r["Gross Units"] || 0);
         map[brand].cancelUnits += Number(r["Cancellation Units"] || 0);
         map[brand].returnUnits += Number(r["Return Units"] || 0);
-        map[brand].grossUnits += Number(r["Gross Units"] || 0);
 
     });
 
-    // CFR ad revenue
+    // Map ad revenue using SKU
     cfr.forEach(r => {
 
-        const brand = r["Brand"] || "Unknown";
+        const sku = r["Sku Id"];
+        const brand = skuBrand[sku];
 
-        if (!map[brand]) return;
+        if (!brand) return;
 
         map[brand].adRevenue += Number(r["Total Revenue (Rs.)"] || 0);
 
