@@ -1,43 +1,24 @@
-import { STATE } from "../../core/stateManager.js";
+import { applyFilters } from "../../core/filterEngine.js";
 
 export function getCtrOrders(){
 
-const rows = STATE.rawData.CTR || [];
-const filters = STATE.filters || {};
+const rows = applyFilters("CTR");
 
-const data = [];
+const data = rows.map(row => {
 
-rows.forEach(row => {
-
-const acc = row["ACC"] || "";
 const date = row["Order Date"] || "";
-
-/* ACCOUNT FILTER */
-if(filters.acc && filters.acc !== "All Accounts"){
-if(acc !== filters.acc) return;
-}
-
-/* DATE FILTER */
-if(filters.startDate){
-if(new Date(date.split("/").reverse().join("-")) < new Date(filters.startDate)) return;
-}
-
-if(filters.endDate){
-if(new Date(date.split("/").reverse().join("-")) > new Date(filters.endDate)) return;
-}
-
 const sku = row["SKU"] || "";
 const type = row["Event Type"] || "";
 const fulfilment = row["Fulfilment Type"] || "";
 const price = Number(row["Price before discount"] || 0);
 
-data.push({
+return {
 date,
 sku,
 type,
 fulfilment,
 price
-});
+};
 
 });
 
