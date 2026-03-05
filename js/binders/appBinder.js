@@ -7,9 +7,8 @@ import { subscribe, STATE } from "../core/stateManager.js";
 import { renderHome } from "./homeBinder.js";
 import { renderAdsPage } from "./adsBinder.js";
 import { renderGmvPage } from "./gmvBinder.js";
-
-import { renderSmartPage } from "./smartBinder.js";
 import { renderCtrPage } from "./ctrBinder.js";
+import { renderSmartPage } from "./smartBinder.js";
 
 async function init() {
 
@@ -24,12 +23,28 @@ async function init() {
 
     subscribe(() => {
 
-        if (STATE.ui.activePage === "ads") renderAdsPage();
-        else if (STATE.ui.activePage === "gmv") renderGmvPage();
-        else if (STATE.ui.activePage === "smart") renderSmartPage();
-        else renderHome();
+        if (STATE.ui.activePage === "ads") {
+            renderAdsPage();
+        }
+
+        else if (STATE.ui.activePage === "gmv") {
+            renderGmvPage();
+        }
+
+        else if (STATE.ui.activePage === "ctr") {
+            renderCtrPage();
+        }
+
+        else if (STATE.ui.activePage === "smart") {
+            renderSmartPage();
+        }
+
+        else {
+            renderHome();
+        }
 
     });
+
 }
 
 init();
