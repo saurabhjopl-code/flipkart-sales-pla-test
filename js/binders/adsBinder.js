@@ -15,11 +15,31 @@ export function renderAdsPage() {
             <div class="section-title">Ads Reports</div>
 
             <div class="ads-tabs">
-                <div class="ads-tab ${STATE.ui.adsSubPage === "campaign" ? "active" : ""}" data-tab="campaign">Campaign</div>
-                <div class="ads-tab ${STATE.ui.adsSubPage === "sku" ? "active" : ""}" data-tab="sku">SKU</div>
-                <div class="ads-tab ${STATE.ui.adsSubPage === "placement" ? "active" : ""}" data-tab="placement">Placement</div>
-                <div class="ads-tab ${STATE.ui.adsSubPage === "keyword" ? "active" : ""}" data-tab="keyword">Keyword</div>
-                <div class="ads-tab ${STATE.ui.adsSubPage === "blended" ? "active" : ""}" data-tab="blended">Blended SKU</div>
+
+                <div class="ads-tab ${STATE.ui.adsSubPage === "overview" ? "active" : ""}" data-tab="overview">
+                    Overview
+                </div>
+
+                <div class="ads-tab ${STATE.ui.adsSubPage === "campaign" ? "active" : ""}" data-tab="campaign">
+                    Campaign
+                </div>
+
+                <div class="ads-tab ${STATE.ui.adsSubPage === "sku" ? "active" : ""}" data-tab="sku">
+                    SKU
+                </div>
+
+                <div class="ads-tab ${STATE.ui.adsSubPage === "placement" ? "active" : ""}" data-tab="placement">
+                    Placement
+                </div>
+
+                <div class="ads-tab ${STATE.ui.adsSubPage === "keyword" ? "active" : ""}" data-tab="keyword">
+                    Keyword
+                </div>
+
+                <div class="ads-tab ${STATE.ui.adsSubPage === "blended" ? "active" : ""}" data-tab="blended">
+                    Blended SKU
+                </div>
+
             </div>
 
             <div id="ads-sub-content"></div>
@@ -37,6 +57,7 @@ export function renderAdsPage() {
 
 function renderActiveSubPage() {
 
+    if (STATE.ui.adsSubPage === "overview") renderAdsOverviewPage();
     if (STATE.ui.adsSubPage === "campaign") renderCampaignSection();
     if (STATE.ui.adsSubPage === "sku") renderSkuSection();
     if (STATE.ui.adsSubPage === "placement") renderPlacementSection();
