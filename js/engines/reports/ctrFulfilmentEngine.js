@@ -1,16 +1,12 @@
-import { STATE } from "../../core/stateManager.js";
+import { applyFilters } from "../../core/filterEngine.js";
 
 export function getCtrFulfilment(){
 
-const data =
-STATE?.data?.ctr ||
-STATE?.data?.CTR ||
-STATE?.data?.ctrData ||
-[];
+const data = applyFilters("CTR");
 
 const map = {};
 
-(data || []).forEach(row => {
+data.forEach(row => {
 
 const fulfilment = row["Fulfilment Type"] || "Unknown";
 const type = (row["Event Type"] || "").toLowerCase();
