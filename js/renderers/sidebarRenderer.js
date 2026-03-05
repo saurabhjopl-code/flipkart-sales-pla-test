@@ -35,5 +35,9 @@ export function renderSidebar() {
     document.getElementById("nav-smart").onclick = () => {
     setActivePage("smart");
     renderSmartPage();
+    };
+
+    document.getElementById("nav-ctr").onclick = () => {
+renderCtrPage();
 };
 }
