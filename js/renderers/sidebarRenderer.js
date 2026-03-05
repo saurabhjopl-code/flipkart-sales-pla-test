@@ -2,6 +2,7 @@ import { renderHome } from "../binders/homeBinder.js";
 import { renderAdsPage } from "../binders/adsBinder.js";
 import { renderGmvPage } from "../binders/gmvBinder.js";
 import { setActivePage } from "../core/stateManager.js";
+import { renderSmartPage } from "../binders/smartBinder.js";
 
 export function renderSidebar() {
 
@@ -29,4 +30,9 @@ export function renderSidebar() {
         setActivePage("gmv");
         renderGmvPage();
     };
+
+    document.getElementById("nav-smart").onclick = () => {
+    setActivePage("smart");
+    renderSmartPage();
+};
 }
