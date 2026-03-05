@@ -3,58 +3,85 @@ import { startProgress, finishProgress } from "./progressEngine.js";
 import { API_CONFIG } from "../config/apiConfig.js";
 
 function parseCSV(text) {
-    const rows = text.trim().split(/\r?\n/);
-    const headers = rows[0].split(",").map(h => h.trim());
 
-    return rows.slice(1).map(row => {
-        const values = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
-        const obj = {};
+const rows = text.trim().split(/\r?\n/);
+const headers = rows[0].split(",").map(h => h.trim());
 
-        headers.forEach((h, i) => {
-            let val = values[i] || "";
-            val = val.replace(/^"|"$/g, "").trim();
-            val = val.replace(/,/g, "");
-            obj[h] = val;
-        });
+return rows.slice(1).map(row => {
 
-        return obj;
-    });
+const values = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+const obj = {};
+
+headers.forEach((h,i)=>{
+
+let val = values[i] || "";
+val = val.replace(/^"|"$/g,"").trim();
+
+const num = Number(val.replace(/,/g,""));
+
+obj[h] = isNaN(num) ? val : num;
+
+});
+
+return obj;
+
+});
+
 }
 
-async function loadCSV(url) {
-    const response = await fetch(url);
-    const text = await response.text();
-    return parseCSV(text);
+async function loadCSV(url){
+
+const response = await fetch(url);
+const text = await response.text();
+
+return parseCSV(text);
+
 }
 
-function buildACCList() {
+function buildACCList(){
 
-    const accSet = new Set();
+const accSet = new Set();
 
-    Object.values(STATE.rawData).forEach(sheet => {
-        sheet.forEach(row => {
-            if (row.ACC && row.ACC !== "") {
-                accSet.add(row.ACC.trim());
-            }
-        });
-    });
+Object.values(STATE.data).forEach(sheet=>{
 
-    const accList = Array.from(accSet).sort();
+sheet.forEach(row=>{
 
-    setMeta({ accList });
-
-    console.log("ACC Loaded:", accList); // Debug check
+if(row.ACC){
+accSet.add(row.ACC.trim());
 }
 
-export async function loadAllData() {
+});
 
-    startProgress();
+});
 
-    for (let key in API_CONFIG) {
-        STATE.rawData[key] = await loadCSV(API_CONFIG[key]);
-    }
+const accList = Array.from(accSet).sort();
 
-    buildACCList();   // ensure meta is built AFTER data load
+setMeta({accList});
 
-    finishProgress();
+console.log("ACC Loaded:", accList);
+
+}
+
+export async function loadAllData(){
+
+startProgress();
+
+const keys = Object.keys(API_CONFIG);
+
+const results = await Promise.all(
+keys.map(key => loadCSV(API_CONFIG[key]))
+);
+
+STATE.data = {};
+
+keys.forEach((key,i)=>{
+STATE.data[key.toLowerCase()] = results[i];
+});
+
+buildACCList();
+
+console.log("Data Loaded:", STATE.data);
+
+finishProgress();
+
 }
