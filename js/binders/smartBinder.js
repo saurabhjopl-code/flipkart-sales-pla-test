@@ -76,7 +76,7 @@ c.innerHTML=`
 </div>
 
 <div class="chart-card">
-<canvas id="funnelChart"></canvas>
+<div id="funnelChart" class="funnel-chart"></div>
 </div>
 
 `;
@@ -87,44 +87,44 @@ renderFunnelChart(f);
 
 function renderFunnelChart(f){
 
-const ctx=document.getElementById("funnelChart");
+const container=document.getElementById("funnelChart");
 
-new Chart(ctx,{
-type:"bar",
-data:{
-labels:[
-"Impressions",
-"Clicks",
-"Ad Units",
-"Orders",
-"Final Sales"
-],
-datasets:[{
-data:[
-f.views,
-f.clicks,
-f.adUnits,
-f.grossUnits,
-f.finalUnits
-],
-backgroundColor:[
-"#f4b6b6",
-"#f9d976",
-"#a8c7fa",
-"#a5e3d0",
-"#9ee3a0"
-]
-}]
-},
-options:{
-indexAxis:"y",
-plugins:{legend:{display:false}},
-scales:{
-x:{grid:{display:false}},
-y:{grid:{display:false}}
-}
-}
-});
+const data=[
+{label:"Impressions",value:f.views,color:"#f4b6b6"},
+{label:"Clicks",value:f.clicks,color:"#f9d976"},
+{label:"Ad Units",value:f.adUnits,color:"#a8c7fa"},
+{label:"Orders",value:f.grossUnits,color:"#a5e3d0"},
+{label:"Final Sales",value:f.finalUnits,color:"#9ee3a0"}
+];
+
+const max=data[0].value;
+
+container.innerHTML=data.map((d,i)=>{
+
+const width=(d.value/max)*100;
+
+return `
+<div style="
+width:${width}%;
+margin:auto;
+background:${d.color};
+height:70px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+margin-bottom:8px;
+border-radius:6px;
+font-weight:600;
+">
+
+<span>${d.label}</span>
+<span>${Number(d.value).toLocaleString()}</span>
+
+</div>
+`;
+
+}).join("");
 
 }
 
