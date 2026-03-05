@@ -2,52 +2,85 @@ import { applyFilters } from "../../core/filterEngine.js";
 
 export function getAdsOverview(){
 
-const adsData = applyFilters("CDR");
+const data = applyFilters("CDR");
 const gmvData = applyFilters("GMV");
 
 let spend = 0;
+let views = 0;
+let clicks = 0;
 let units = 0;
 let revenue = 0;
 
-/* Ads data */
+const campaignMap = {};
 
-adsData.forEach(row => {
+data.forEach(row=>{
 
-spend += Number(row["Ad Spend"] || 0);
-units += Number(row["Total Converted Units"] || 0);
-revenue += Number(row["Total Revenue (Rs.)"] || 0);
+const campaign = row["Campaign Name"] || "Unknown";
+
+const adSpend = Number(row["Ad Spend"] || 0);
+const v = Number(row["Views"] || 0);
+const c = Number(row["Clicks"] || 0);
+const u = Number(row["Total Converted Units"] || 0);
+const rev = Number(row["Total Revenue (Rs.)"] || 0);
+
+spend += adSpend;
+views += v;
+clicks += c;
+units += u;
+revenue += rev;
+
+if(!campaignMap[campaign]){
+
+campaignMap[campaign] = {
+campaign,
+spend:0,
+views:0,
+clicks:0,
+units:0,
+revenue:0
+};
+
+}
+
+campaignMap[campaign].spend += adSpend;
+campaignMap[campaign].views += v;
+campaignMap[campaign].clicks += c;
+campaignMap[campaign].units += u;
+campaignMap[campaign].revenue += rev;
 
 });
 
-/* GMV Net Revenue */
+/* GMV FINAL SALE */
 
 let finalRevenue = 0;
 
-gmvData.forEach(row => {
-
-finalRevenue += Number(row["Final Sale Amount"] || 0);
-
+gmvData.forEach(r=>{
+finalRevenue += Number(r["Final Sale Amount"] || 0);
 });
 
-/* Fixed Ads Budget (3%) */
+/* KPIs */
+
+const roi = spend ? revenue/spend : 0;
+const ctr = views ? (clicks/views)*100 : 0;
+const cvr = clicks ? (units/clicks)*100 : 0;
 
 const fixedAds = finalRevenue * 0.03;
-
-/* Difference */
-
 const diff = spend - fixedAds;
 
-/* ROI */
-
-const roi = spend ? revenue / spend : 0;
-
 return {
+summary:{
 spend,
-units,
-revenue,
 roi,
+views,
+clicks,
+ctr,
+units,
+cvr,
+revenue,
 fixedAds,
 diff
+},
+campaigns:Object.values(campaignMap)
 };
 
 }
