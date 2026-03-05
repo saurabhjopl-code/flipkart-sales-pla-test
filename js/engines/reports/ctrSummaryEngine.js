@@ -2,7 +2,11 @@ import { STATE } from "../../core/stateManager.js";
 
 export function getCtrSummary(){
 
-const data = STATE.data.ctr || [];
+const data =
+STATE?.data?.ctr ||
+STATE?.data?.CTR ||
+STATE?.data?.ctrData ||
+[];
 
 let saleValue = 0;
 let cancelValue = 0;
@@ -19,17 +23,17 @@ const price = Number(row["Price before discount"] || 0);
 
 if(type === "sale"){
 saleValue += price;
-saleOrders += 1;
+saleOrders++;
 }
 
 if(type === "cancel"){
 cancelValue += price;
-cancelOrders += 1;
+cancelOrders++;
 }
 
 if(type === "return"){
 returnValue += price;
-returnOrders += 1;
+returnOrders++;
 }
 
 });
