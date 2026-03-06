@@ -19,6 +19,8 @@ container.innerHTML = `
 <div class="summary-card"><div class="summary-label">Total Units Sold</div><div id="ads-units">0</div></div>
 <div class="summary-card"><div class="summary-label">CVR</div><div id="ads-cvr">0%</div></div>
 <div class="summary-card"><div class="summary-label">GMV</div><div id="ads-revenue">₹0</div></div>
+<div class="summary-card"><div class="summary-label">Fixed Ads (5%)</div><div id="ads-fixed">₹0</div></div>
+<div class="summary-card"><div class="summary-label">Ads Amount Diff</div><div id="ads-diff">₹0</div></div>
 </div>
 
 <table class="report-table">
@@ -49,6 +51,8 @@ document.getElementById("ads-ctr").innerText = data.ctr.toFixed(2) + "%";
 document.getElementById("ads-units").innerText = data.units.toLocaleString();
 document.getElementById("ads-cvr").innerText = data.cvr.toFixed(2) + "%";
 document.getElementById("ads-revenue").innerText = "₹" + data.revenue.toLocaleString();
+document.getElementById("ads-fixed").innerText ="₹" + data.fixedAds.toLocaleString();
+document.getElementById("ads-diff").innerText ="₹" + data.diff.toLocaleString(); 
 
 const table = document.getElementById("ads-overview-table");
 
