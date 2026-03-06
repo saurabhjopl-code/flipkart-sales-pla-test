@@ -3,146 +3,225 @@ import { getTodayISO, getLast30Days } from "../core/dateEngine.js";
 
 export function renderFilters() {
 
-    const container = document.getElementById("filter-bar");
+const container = document.getElementById("filter-bar");
 
-    const accList = (STATE.meta && STATE.meta.accList)
-        ? STATE.meta.accList
-        : [];
+const accList = (STATE.meta && STATE.meta.accList)
+? STATE.meta.accList
+: [];
 
-    const accOptions = `
-        <option value="">All Accounts</option>
-        ${accList.map(acc => `<option value="${acc}">${acc}</option>`).join("")}
-    `;
+const accOptions = `
+<option value="">All Accounts</option>
+${accList.map(acc => `<option value="${acc}">${acc}</option>`).join("")}
+`;
 
-    /* -------- Month Options -------- */
+/* -------- Month Options -------- */
 
-    const monthNames = [
-        "Jan","Feb","Mar","Apr","May","Jun",
-        "Jul","Aug","Sep","Oct","Nov","Dec"
-    ];
+const monthNames = [
+"Jan","Feb","Mar","Apr","May","Jun",
+"Jul","Aug","Sep","Oct","Nov","Dec"
+];
 
-    const today = new Date();
-    const currentYear = today.getFullYear();
+const startMonth = new Date(2025,10,1); // Nov 2025
+const today = new Date();
 
-    let monthOptions = `<option value="">All</option>`;
+let monthOptions = `<option value="">All</option>`;
 
-    for(let m=0; m<12; m++){
+let cursor = new Date(startMonth);
 
-        const monthNum = String(m+1).padStart(2,"0");
-        const label = `${monthNames[m]} ${currentYear}`;
+while(cursor <= today){
 
-        monthOptions += `<option value="${currentYear}-${monthNum}">${label}</option>`;
-    }
+const year = cursor.getFullYear();
+const month = cursor.getMonth();
 
-    /* -------- UI -------- */
+const monthNum = String(month+1).padStart(2,"0");
 
-    container.innerHTML = `
-        <div class="filter-group">
-            <label>Account</label>
-            <select id="acc-select" style="min-width:200px;">
-                ${accOptions}
-            </select>
-        </div>
+const label = `${monthNames[month]} ${year}`;
 
-        <div class="filter-group">
-            <label>Month</label>
-            <select id="month-select" style="min-width:160px;">
-                ${monthOptions}
-            </select>
-        </div>
+monthOptions += `<option value="${year}-${monthNum}">${label}</option>`;
 
-        <div class="filter-group">
-            <label>Start Date</label>
-            <input type="date" id="start-date" max="${getTodayISO()}" />
-        </div>
+cursor.setMonth(cursor.getMonth()+1);
+}
 
-        <div class="filter-group">
-            <label>End Date</label>
-            <input type="date" id="end-date" max="${getTodayISO()}" />
-        </div>
+/* -------- UI -------- */
 
-        <div class="filter-actions">
-            <button id="clear-filters">Clear</button>
-        </div>
-    `;
+container.innerHTML = `
 
-    const accSelect = document.getElementById("acc-select");
-    const monthSelect = document.getElementById("month-select");
-    const startInput = document.getElementById("start-date");
-    const endInput = document.getElementById("end-date");
+<div class="filter-group">
+<label>Account</label>
+<select id="acc-select" style="min-width:200px;">
+${accOptions}
+</select>
+</div>
 
-    /* -------- Default = Last 30 Days -------- */
+<div class="filter-group">
+<label>Month</label>
+<select id="month-select" style="min-width:160px;">
+${monthOptions}
+</select>
+</div>
 
-    const last30 = getLast30Days();
+<div class="filter-group">
+<label>Start Date</label>
+<input type="date" id="start-date" max="${getTodayISO()}" />
+</div>
 
-    startInput.value = last30.start;
-    endInput.value = last30.end;
+<div class="filter-group">
+<label>End Date</label>
+<input type="date" id="end-date" max="${getTodayISO()}" />
+</div>
 
-    /* -------- Filter Update -------- */
+<div class="filter-group quick-buttons">
 
-    function update(){
+<button id="btn-7">Last 7 Days</button>
+<button id="btn-30">Last 30 Days</button>
+<button id="btn-this-month">This Month</button>
+<button id="btn-last-month">Last Month</button>
 
-        const selectedAcc = accSelect.value;
+</div>
 
-        setFilters({
-            acc: selectedAcc ? [selectedAcc] : [],
-            startDate: startInput.value || null,
-            endDate: endInput.value || null
-        });
-    }
+<div class="filter-actions">
+<button id="clear-filters">Clear</button>
+</div>
 
-    /* -------- Month Change Logic -------- */
+`;
 
-    monthSelect.addEventListener("change", () => {
+const accSelect = document.getElementById("acc-select");
+const monthSelect = document.getElementById("month-select");
+const startInput = document.getElementById("start-date");
+const endInput = document.getElementById("end-date");
 
-        const val = monthSelect.value;
+/* -------- Default = Last 30 Days -------- */
 
-        if(!val){
-            update();
-            return;
-        }
+const last30 = getLast30Days();
 
-        const [year,month] = val.split("-");
+startInput.value = last30.start;
+endInput.value = last30.end;
 
-        const firstDay = `${year}-${month}-01`;
+/* -------- Filter Update -------- */
 
-        const lastDayDate = new Date(year, month, 0);
-        const lastDay = lastDayDate.toISOString().split("T")[0];
+function update(){
 
-        startInput.value = firstDay;
-        endInput.value = lastDay;
+const selectedAcc = accSelect.value;
 
-        update();
-    });
+setFilters({
+acc: selectedAcc ? [selectedAcc] : [],
+startDate: startInput.value || null,
+endDate: endInput.value || null
+});
 
-    accSelect.addEventListener("change", update);
-    startInput.addEventListener("change", update);
-    endInput.addEventListener("change", update);
+}
 
-    /* -------- Clear Button -------- */
+/* -------- Month Change -------- */
 
-    document.getElementById("clear-filters").addEventListener("click", () => {
+monthSelect.addEventListener("change",()=>{
 
-        accSelect.value = "";
-        monthSelect.value = "";
+const val = monthSelect.value;
 
-        const last30 = getLast30Days();
+if(!val){
+update();
+return;
+}
 
-        startInput.value = last30.start;
-        endInput.value = last30.end;
+const [year,month] = val.split("-");
 
-        setFilters({
-            acc: [],
-            startDate: last30.start,
-            endDate: last30.end
-        });
-    });
+const firstDay = `${year}-${month}-01`;
 
-    /* -------- Initial Load -------- */
+const lastDayDate = new Date(year, month, 0);
+const lastDay = lastDayDate.toISOString().split("T")[0];
 
-    setFilters({
-        acc: [],
-        startDate: last30.start,
-        endDate: last30.end
-    });
+startInput.value = firstDay;
+endInput.value = lastDay;
+
+update();
+
+});
+
+/* -------- Quick Buttons -------- */
+
+document.getElementById("btn-7").onclick = ()=>{
+
+const today = new Date();
+const past = new Date();
+
+past.setDate(today.getDate()-7);
+
+startInput.value = past.toISOString().split("T")[0];
+endInput.value = today.toISOString().split("T")[0];
+
+update();
+
+};
+
+document.getElementById("btn-30").onclick = ()=>{
+
+const last30 = getLast30Days();
+
+startInput.value = last30.start;
+endInput.value = last30.end;
+
+update();
+
+};
+
+document.getElementById("btn-this-month").onclick = ()=>{
+
+const today = new Date();
+
+const firstDay = new Date(today.getFullYear(), today.getMonth(),1);
+
+startInput.value = firstDay.toISOString().split("T")[0];
+endInput.value = today.toISOString().split("T")[0];
+
+update();
+
+};
+
+document.getElementById("btn-last-month").onclick = ()=>{
+
+const today = new Date();
+
+const firstDay = new Date(today.getFullYear(), today.getMonth()-1,1);
+const lastDay = new Date(today.getFullYear(), today.getMonth(),0);
+
+startInput.value = firstDay.toISOString().split("T")[0];
+endInput.value = lastDay.toISOString().split("T")[0];
+
+update();
+
+};
+
+/* -------- Standard Filters -------- */
+
+accSelect.addEventListener("change",update);
+startInput.addEventListener("change",update);
+endInput.addEventListener("change",update);
+
+/* -------- Clear Button -------- */
+
+document.getElementById("clear-filters").addEventListener("click",()=>{
+
+accSelect.value="";
+monthSelect.value="";
+
+const last30 = getLast30Days();
+
+startInput.value = last30.start;
+endInput.value = last30.end;
+
+setFilters({
+acc:[],
+startDate:last30.start,
+endDate:last30.end
+});
+
+});
+
+/* -------- Initial Load -------- */
+
+setFilters({
+acc:[],
+startDate:last30.start,
+endDate:last30.end
+});
+
 }
