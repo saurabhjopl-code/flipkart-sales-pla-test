@@ -14,7 +14,7 @@ const accOptions = `
 ${accList.map(acc => `<option value="${acc}">${acc}</option>`).join("")}
 `;
 
-/* -------- Month Options -------- */
+/* ---------- Month Options ---------- */
 
 const monthNames = [
 "Jan","Feb","Mar","Apr","May","Jun",
@@ -42,7 +42,7 @@ monthOptions += `<option value="${year}-${monthNum}">${label}</option>`;
 cursor.setMonth(cursor.getMonth()+1);
 }
 
-/* -------- UI -------- */
+/* ---------- UI ---------- */
 
 container.innerHTML = `
 
@@ -50,6 +50,17 @@ container.innerHTML = `
 <label>Account</label>
 <select id="acc-select" style="min-width:200px;">
 ${accOptions}
+</select>
+</div>
+
+<div class="filter-group">
+<label>Time Range</label>
+<select id="range-select" style="min-width:160px;">
+<option value="">Custom</option>
+<option value="7">Last 7 Days</option>
+<option value="30">Last 30 Days</option>
+<option value="thisMonth">This Month</option>
+<option value="lastMonth">Last Month</option>
 </select>
 </div>
 
@@ -70,15 +81,6 @@ ${monthOptions}
 <input type="date" id="end-date" max="${getTodayISO()}" />
 </div>
 
-<div class="filter-group quick-buttons">
-
-<button id="btn-7">Last 7 Days</button>
-<button id="btn-30">Last 30 Days</button>
-<button id="btn-this-month">This Month</button>
-<button id="btn-last-month">Last Month</button>
-
-</div>
-
 <div class="filter-actions">
 <button id="clear-filters">Clear</button>
 </div>
@@ -86,18 +88,20 @@ ${monthOptions}
 `;
 
 const accSelect = document.getElementById("acc-select");
+const rangeSelect = document.getElementById("range-select");
 const monthSelect = document.getElementById("month-select");
 const startInput = document.getElementById("start-date");
 const endInput = document.getElementById("end-date");
 
-/* -------- Default = Last 30 Days -------- */
+/* ---------- Default = Last 30 Days ---------- */
 
 const last30 = getLast30Days();
 
 startInput.value = last30.start;
 endInput.value = last30.end;
+rangeSelect.value = "30";
 
-/* -------- Filter Update -------- */
+/* ---------- Update Function ---------- */
 
 function update(){
 
@@ -111,7 +115,57 @@ endDate: endInput.value || null
 
 }
 
-/* -------- Month Change -------- */
+/* ---------- Time Range Filter ---------- */
+
+rangeSelect.addEventListener("change",()=>{
+
+const val = rangeSelect.value;
+
+const today = new Date();
+
+if(val === "7"){
+
+const past = new Date();
+past.setDate(today.getDate()-7);
+
+startInput.value = past.toISOString().split("T")[0];
+endInput.value = today.toISOString().split("T")[0];
+
+}
+
+if(val === "30"){
+
+const last30 = getLast30Days();
+
+startInput.value = last30.start;
+endInput.value = last30.end;
+
+}
+
+if(val === "thisMonth"){
+
+const first = new Date(today.getFullYear(),today.getMonth(),1);
+
+startInput.value = first.toISOString().split("T")[0];
+endInput.value = today.toISOString().split("T")[0];
+
+}
+
+if(val === "lastMonth"){
+
+const first = new Date(today.getFullYear(),today.getMonth()-1,1);
+const last = new Date(today.getFullYear(),today.getMonth(),0);
+
+startInput.value = first.toISOString().split("T")[0];
+endInput.value = last.toISOString().split("T")[0];
+
+}
+
+update();
+
+});
+
+/* ---------- Month Filter ---------- */
 
 monthSelect.addEventListener("change",()=>{
 
@@ -132,76 +186,38 @@ const lastDay = lastDayDate.toISOString().split("T")[0];
 startInput.value = firstDay;
 endInput.value = lastDay;
 
+rangeSelect.value = "";
+
 update();
 
 });
 
-/* -------- Quick Buttons -------- */
-
-document.getElementById("btn-7").onclick = ()=>{
-
-const today = new Date();
-const past = new Date();
-
-past.setDate(today.getDate()-7);
-
-startInput.value = past.toISOString().split("T")[0];
-endInput.value = today.toISOString().split("T")[0];
-
-update();
-
-};
-
-document.getElementById("btn-30").onclick = ()=>{
-
-const last30 = getLast30Days();
-
-startInput.value = last30.start;
-endInput.value = last30.end;
-
-update();
-
-};
-
-document.getElementById("btn-this-month").onclick = ()=>{
-
-const today = new Date();
-
-const firstDay = new Date(today.getFullYear(), today.getMonth(),1);
-
-startInput.value = firstDay.toISOString().split("T")[0];
-endInput.value = today.toISOString().split("T")[0];
-
-update();
-
-};
-
-document.getElementById("btn-last-month").onclick = ()=>{
-
-const today = new Date();
-
-const firstDay = new Date(today.getFullYear(), today.getMonth()-1,1);
-const lastDay = new Date(today.getFullYear(), today.getMonth(),0);
-
-startInput.value = firstDay.toISOString().split("T")[0];
-endInput.value = lastDay.toISOString().split("T")[0];
-
-update();
-
-};
-
-/* -------- Standard Filters -------- */
+/* ---------- Standard Filters ---------- */
 
 accSelect.addEventListener("change",update);
-startInput.addEventListener("change",update);
-endInput.addEventListener("change",update);
+startInput.addEventListener("change",()=>{
 
-/* -------- Clear Button -------- */
+rangeSelect.value="";
+monthSelect.value="";
+update();
+
+});
+
+endInput.addEventListener("change",()=>{
+
+rangeSelect.value="";
+monthSelect.value="";
+update();
+
+});
+
+/* ---------- Clear Button ---------- */
 
 document.getElementById("clear-filters").addEventListener("click",()=>{
 
 accSelect.value="";
 monthSelect.value="";
+rangeSelect.value="30";
 
 const last30 = getLast30Days();
 
@@ -216,7 +232,7 @@ endDate:last30.end
 
 });
 
-/* -------- Initial Load -------- */
+/* ---------- Initial Load ---------- */
 
 setFilters({
 acc:[],
