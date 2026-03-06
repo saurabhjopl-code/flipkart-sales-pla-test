@@ -1,8 +1,8 @@
 import { applyFilters } from "../../core/filterEngine.js";
 
-export function getAdsOverview() {
+export function getAdsOverview(){
 
-    const data = applyFilters("CDR");
+    const rows = applyFilters("CDR");
 
     let spend = 0;
     let views = 0;
@@ -12,14 +12,14 @@ export function getAdsOverview() {
 
     const campaignMap = {};
 
-    data.forEach(row => {
+    rows.forEach(row => {
 
         const campaign = row["Campaign Name"] || "Unknown";
 
         const s = Number(row["Ad Spend"] || 0);
         const v = Number(row["Views"] || 0);
         const c = Number(row["Clicks"] || 0);
-        const u = Number(row["Total Converted Units"] || 0);
+        const u = Number(row["Total converted units"] || 0);
         const r = Number(row["Total Revenue (Rs.)"] || 0);
 
         spend += s;
@@ -28,14 +28,14 @@ export function getAdsOverview() {
         units += u;
         revenue += r;
 
-        if (!campaignMap[campaign]) {
+        if(!campaignMap[campaign]){
             campaignMap[campaign] = {
                 campaign,
-                spend: 0,
-                views: 0,
-                clicks: 0,
-                units: 0,
-                revenue: 0
+                spend:0,
+                views:0,
+                clicks:0,
+                units:0,
+                revenue:0
             };
         }
 
@@ -49,9 +49,9 @@ export function getAdsOverview() {
 
     const campaigns = Object.values(campaignMap);
 
-    const roi = spend > 0 ? revenue / spend : 0;
-    const ctr = views > 0 ? (clicks / views) * 100 : 0;
-    const cvr = clicks > 0 ? (units / clicks) * 100 : 0;
+    const roi = spend ? revenue / spend : 0;
+    const ctr = views ? (clicks / views) * 100 : 0;
+    const cvr = clicks ? (units / clicks) * 100 : 0;
 
     return {
         spend,
@@ -64,4 +64,5 @@ export function getAdsOverview() {
         cvr,
         campaigns
     };
+
 }
