@@ -1,68 +1,76 @@
-import { applyFilters } from "../../core/filterEngine.js";
+import { getAdsOverview } from "../engines/reports/adsOverviewEngine.js";
 
-export function getAdsOverview(){
+export function renderAdsOverviewPage() {
 
-    const rows = applyFilters("CDR");
+const container = document.getElementById("ads-sub-content");
 
-    let spend = 0;
-    let views = 0;
-    let clicks = 0;
-    let units = 0;
-    let revenue = 0;
+if (!container) return;
 
-    const campaignMap = {};
+container.innerHTML = `
+<div class="section">
+<div class="section-title">Ads Efficiency & Budget Control</div>
 
-    rows.forEach(row => {
+<div class="summary-grid">
+<div class="summary-card"><div class="summary-label">Ad Spends</div><div id="ads-spend">₹0</div></div>
+<div class="summary-card"><div class="summary-label">ROI</div><div id="ads-roi">0</div></div>
+<div class="summary-card"><div class="summary-label">Views</div><div id="ads-views">0</div></div>
+<div class="summary-card"><div class="summary-label">Clicks</div><div id="ads-clicks">0</div></div>
+<div class="summary-card"><div class="summary-label">CTR</div><div id="ads-ctr">0%</div></div>
+<div class="summary-card"><div class="summary-label">Total Units Sold</div><div id="ads-units">0</div></div>
+<div class="summary-card"><div class="summary-label">CVR</div><div id="ads-cvr">0%</div></div>
+<div class="summary-card"><div class="summary-label">GMV</div><div id="ads-revenue">₹0</div></div>
+</div>
 
-        const campaign = row["Campaign Name"] || "Unknown";
+<table class="report-table">
+<thead>
+<tr>
+<th>Campaign Name</th>
+<th>Ad Spend</th>
+<th>Views</th>
+<th>Clicks</th>
+<th>Total Units Sold</th>
+<th>Total Revenue</th>
+</tr>
+</thead>
+<tbody id="ads-overview-table"></tbody>
+</table>
+</div>
+`;
 
-        const s = Number(row["Ad Spend"] || 0);
-        const v = Number(row["Views"] || 0);
-        const c = Number(row["Clicks"] || 0);
-        const u = Number(row["Total converted units"] || 0);
-        const r = Number(row["Total Revenue (Rs.)"] || 0);
+try {
 
-        spend += s;
-        views += v;
-        clicks += c;
-        units += u;
-        revenue += r;
+const data = getAdsOverview();
 
-        if(!campaignMap[campaign]){
-            campaignMap[campaign] = {
-                campaign,
-                spend:0,
-                views:0,
-                clicks:0,
-                units:0,
-                revenue:0
-            };
-        }
+document.getElementById("ads-spend").innerText = "₹" + data.spend.toLocaleString();
+document.getElementById("ads-roi").innerText = data.roi.toFixed(2);
+document.getElementById("ads-views").innerText = data.views.toLocaleString();
+document.getElementById("ads-clicks").innerText = data.clicks.toLocaleString();
+document.getElementById("ads-ctr").innerText = data.ctr.toFixed(2) + "%";
+document.getElementById("ads-units").innerText = data.units.toLocaleString();
+document.getElementById("ads-cvr").innerText = data.cvr.toFixed(2) + "%";
+document.getElementById("ads-revenue").innerText = "₹" + data.revenue.toLocaleString();
 
-        campaignMap[campaign].spend += s;
-        campaignMap[campaign].views += v;
-        campaignMap[campaign].clicks += c;
-        campaignMap[campaign].units += u;
-        campaignMap[campaign].revenue += r;
+const table = document.getElementById("ads-overview-table");
 
-    });
+data.campaigns.forEach(r => {
 
-    const campaigns = Object.values(campaignMap);
+const tr = document.createElement("tr");
 
-    const roi = spend ? revenue / spend : 0;
-    const ctr = views ? (clicks / views) * 100 : 0;
-    const cvr = clicks ? (units / clicks) * 100 : 0;
+tr.innerHTML = `
+<td>${r.campaign}</td>
+<td>₹${r.spend.toLocaleString()}</td>
+<td>${r.views.toLocaleString()}</td>
+<td>${r.clicks.toLocaleString()}</td>
+<td>${r.units.toLocaleString()}</td>
+<td>₹${r.revenue.toLocaleString()}</td>
+`;
 
-    return {
-        spend,
-        views,
-        clicks,
-        units,
-        revenue,
-        roi,
-        ctr,
-        cvr,
-        campaigns
-    };
+table.appendChild(tr);
+
+});
+
+} catch (e) {
+console.error("Ads Overview failed:", e);
+}
 
 }
