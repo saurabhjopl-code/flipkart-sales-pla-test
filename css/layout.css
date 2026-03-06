@@ -65,9 +65,9 @@ body {
 /* SIDEBAR */
 
 .sidebar {
-    width: 240px;
-    background: #111827;
-    color: #d1d5db;
+    width: 210px;
+    background: #d1d4dc;
+    color: #2664c1;
     padding: 24px 20px;
 }
 
