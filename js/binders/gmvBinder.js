@@ -19,6 +19,7 @@ export function renderGmvPage() {
     const container = document.getElementById("app-content");
 
     if (!STATE.ui.gmvSubPage) STATE.ui.gmvSubPage = "overview";
+    if (!STATE.ui.gmvChartMode) STATE.ui.gmvChartMode = "revenue";
 
     container.innerHTML = `
         <div class="section">
@@ -68,12 +69,77 @@ function renderOverview() {
             <div class="kpi-card"><div class="kpi-label">Final Revenue</div><div class="kpi-value">${formatINR(data.finalRevenue)}</div></div>
         </div>
 
+        <div style="margin-bottom:12px;">
+            <button id="gmvRevenueBtn" class="ads-tab ${STATE.ui.gmvChartMode==="revenue"?"active":""}">Revenue</button>
+            <button id="gmvUnitsBtn" class="ads-tab ${STATE.ui.gmvChartMode==="units"?"active":""}">Units</button>
+        </div>
+
         <div class="chart-card">
             <canvas id="gmvOverviewChart"></canvas>
         </div>
     `;
 
-    renderLineChart("gmvOverviewChart", data.chartData.labels, data.chartData.datasets);
+    document.getElementById("gmvRevenueBtn").onclick = () => {
+        STATE.ui.gmvChartMode = "revenue";
+        renderOverview();
+    };
+
+    document.getElementById("gmvUnitsBtn").onclick = () => {
+        STATE.ui.gmvChartMode = "units";
+        renderOverview();
+    };
+
+    const chartData = buildChartData(data);
+
+    renderLineChart(
+        "gmvOverviewChart",
+        chartData.labels,
+        chartData.datasets
+    );
+}
+
+function buildChartData(data){
+
+    const labels = data.chartData.labels;
+
+    if(STATE.ui.gmvChartMode === "units"){
+
+        return {
+            labels,
+            datasets:[
+                {
+                    label:"Gross Units",
+                    data: labels.map((_,i)=>data.chartData.datasets[2].data[i] + data.chartData.datasets[3].data[i] + data.chartData.datasets[1].data[i]/1),
+                    borderColor:"#2563eb",
+                    tension:0.3
+                },
+                {
+                    label:"Cancel Units",
+                    data:data.chartData.datasets[2].data,
+                    borderColor:"#dc2626",
+                    tension:0.3
+                },
+                {
+                    label:"Return Units",
+                    data:data.chartData.datasets[3].data,
+                    borderColor:"#f59e0b",
+                    tension:0.3
+                },
+                {
+                    label:"Final Units",
+                    data:labels.map((_,i)=>
+                        (data.chartData.datasets[2].data[i] + data.chartData.datasets[3].data[i]) ?
+                        data.chartData.datasets[2].data[i] : 0
+                    ),
+                    borderColor:"#16a34a",
+                    tension:0.3
+                }
+            ]
+        }
+
+    }
+
+    return data.chartData;
 }
 
 function renderBrand() {
