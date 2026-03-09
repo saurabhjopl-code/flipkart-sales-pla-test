@@ -1,227 +1,200 @@
 import { STATE } from "../core/stateManager.js";
 import { getGmvOverview } from "../engines/reports/gmvOverviewEngine.js";
-import { getGmvBrandReport } from "../engines/reports/gmvBrandReportEngine.js";
-import { getGmvCategoryReport } from "../engines/reports/gmvCategoryReportEngine.js";
-import { getGmvFulfillmentReport } from "../engines/reports/gmvFulfillmentReportEngine.js";
-import { getGmvLocationReport } from "../engines/reports/gmvLocationReportEngine.js";
+import { getGMVSummary } from "../engines/summary/gmvSummaryEngine.js";
 import { renderLineChart } from "../engines/charts/chartFactory.js";
 
-function formatINR(num){
-    return "₹ " + Number(num || 0).toLocaleString("en-IN");
+function inr(n){
+    return "₹" + Number(n || 0).toLocaleString("en-IN");
 }
 
-function percent(val){
-    return (val * 100).toFixed(2) + "%";
+function pct(v){
+    return (v*100).toFixed(2) + "%";
+}
+
+function compare(curr,prev){
+    if(!prev) return {val:0,label:""};
+    const diff=((curr-prev)/prev)*100;
+    const arrow=diff>=0?"▲":"▼";
+    return {
+        val:diff,
+        label:`${arrow} ${Math.abs(diff).toFixed(1)}% (From previous period)`
+    };
 }
 
 export function renderGmvPage(){
 
     const container=document.getElementById("app-content");
 
-    if(!STATE.ui.gmvSubPage) STATE.ui.gmvSubPage="overview";
     if(!STATE.ui.gmvChartMode) STATE.ui.gmvChartMode="revenue";
 
-    container.innerHTML=`
-        <div class="section">
+    const todayData=getGMVSummary();
 
-            <div class="section-title">GMV Reports</div>
+    const previousFilters={...STATE.filters};
 
-            <div class="ads-tabs">
-                <div class="ads-tab ${STATE.ui.gmvSubPage==="overview"?"active":""}" data-tab="overview">Overview</div>
-                <div class="ads-tab ${STATE.ui.gmvSubPage==="brand"?"active":""}" data-tab="brand">Brand</div>
-                <div class="ads-tab ${STATE.ui.gmvSubPage==="category"?"active":""}" data-tab="category">Category</div>
-                <div class="ads-tab ${STATE.ui.gmvSubPage==="fulfillment"?"active":""}" data-tab="fulfillment">Fulfillment</div>
-                <div class="ads-tab ${STATE.ui.gmvSubPage==="location"?"active":""}" data-tab="location">Location</div>
-            </div>
+    const start=new Date(previousFilters.startDate);
+    const end=new Date(previousFilters.endDate);
+    const diff=end-start;
 
-            <div id="gmv-sub-content"></div>
+    const prevEnd=new Date(start);
+    prevEnd.setDate(prevEnd.getDate()-1);
 
-        </div>
-    `;
+    const prevStart=new Date(prevEnd);
+    prevStart.setTime(prevEnd.getTime()-diff);
 
-    document.querySelectorAll(".ads-tab").forEach(tab=>{
-        tab.onclick=()=>{
-            STATE.ui.gmvSubPage=tab.dataset.tab;
-            renderGmvPage();
-        };
-    });
+    STATE.filters.startDate=prevStart.toISOString().split("T")[0];
+    STATE.filters.endDate=prevEnd.toISOString().split("T")[0];
 
-    if(STATE.ui.gmvSubPage==="overview") renderOverview();
-    if(STATE.ui.gmvSubPage==="brand") renderBrand();
-    if(STATE.ui.gmvSubPage==="category") renderCategory();
-    if(STATE.ui.gmvSubPage==="fulfillment") renderFulfillment();
-    if(STATE.ui.gmvSubPage==="location") renderLocation();
-}
+    const prevData=getGMVSummary();
 
-function renderOverview(){
+    STATE.filters=previousFilters;
 
-    const container=document.getElementById("gmv-sub-content");
-    const data=getGmvOverview();
-
-    const cancelRate = data.grossUnits ? data.cancelUnits / data.grossUnits : 0;
-    const returnRate = data.grossUnits ? data.returnUnits / data.grossUnits : 0;
+    const grossCompare=compare(todayData.gmv,prevData.gmv);
+    const cancelCompare=compare(todayData.cancelAmount,prevData.cancelAmount);
+    const afterCancel=todayData.gmv-todayData.cancelAmount;
+    const prevAfterCancel=prevData.gmv-prevData.cancelAmount;
+    const afterCancelCompare=compare(afterCancel,prevAfterCancel);
+    const returnCompare=compare(todayData.returnAmount,prevData.returnAmount);
+    const netCompare=compare(todayData.finalAmount,prevData.finalAmount);
 
     container.innerHTML=`
 
-        <div class="kpi-row">
+    <div class="section">
 
-            <div class="kpi-card">
-                <div class="kpi-label">Gross Units</div>
-                <div class="kpi-value">${data.grossUnits}</div>
-            </div>
+    <div class="section-title">GMV Performance Summary</div>
 
-            <div class="kpi-card">
-                <div class="kpi-label">GMV</div>
-                <div class="kpi-value">${formatINR(data.gmv)}</div>
-            </div>
+    <div class="kpi-row">
 
-            <div class="kpi-card">
-                <div class="kpi-label">Cancel Units (${percent(cancelRate)})</div>
-                <div class="kpi-value">${data.cancelUnits}</div>
-            </div>
+    <div class="kpi-card">
+    <div class="kpi-label">Gross Sales</div>
+    <div class="kpi-value">${inr(todayData.gmv)} (${todayData.grossUnits} units)</div>
+    <div class="kpi-compare">${grossCompare.label}</div>
+    </div>
 
-            <div class="kpi-card">
-                <div class="kpi-label">Return Units (${percent(returnRate)})</div>
-                <div class="kpi-value">${data.returnUnits}</div>
-            </div>
+    <div class="kpi-card">
+    <div class="kpi-label">Cancellations</div>
+    <div class="kpi-value">${inr(todayData.cancelAmount)} (${todayData.cancelUnits} units)</div>
+    <div class="kpi-compare">${cancelCompare.label}</div>
+    </div>
 
-            <div class="kpi-card">
-                <div class="kpi-label">Final Units</div>
-                <div class="kpi-value">${data.finalUnits}</div>
-            </div>
+    <div class="kpi-card">
+    <div class="kpi-label">Sales After Cancellations</div>
+    <div class="kpi-value">${inr(afterCancel)} (${todayData.grossUnits-todayData.cancelUnits} units)</div>
+    <div class="kpi-compare">${afterCancelCompare.label}</div>
+    </div>
 
-            <div class="kpi-card">
-                <div class="kpi-label">Net Revenue</div>
-                <div class="kpi-value">${formatINR(data.finalRevenue)}</div>
-            </div>
+    <div class="kpi-card">
+    <div class="kpi-label">Returns</div>
+    <div class="kpi-value">${inr(todayData.returnAmount)} (${todayData.returnUnits} units)</div>
+    <div class="kpi-compare">${returnCompare.label}</div>
+    </div>
 
-        </div>
+    <div class="kpi-card">
+    <div class="kpi-label">Net Sales</div>
+    <div class="kpi-value">${inr(todayData.finalAmount)} (${todayData.finalUnits} units)</div>
+    <div class="kpi-compare">${netCompare.label}</div>
+    </div>
 
-        <div class="toggle-group">
-            <button id="toggleRevenue" class="toggle-btn ${STATE.ui.gmvChartMode==="revenue"?"active":""}">Revenue</button>
-            <button id="toggleUnits" class="toggle-btn ${STATE.ui.gmvChartMode==="units"?"active":""}">Units</button>
-        </div>
+    </div>
 
-        <div class="chart-card">
-            <canvas id="gmvOverviewChart"></canvas>
-        </div>
+    <div class="chart-toggle">
 
+        <button id="revBtn" class="toggle-btn ${STATE.ui.gmvChartMode==="revenue"?"active":""}">Revenue</button>
+        <button id="unitBtn" class="toggle-btn ${STATE.ui.gmvChartMode==="units"?"active":""}">Units</button>
+
+    </div>
+
+    <div class="chart-card">
+        <canvas id="gmvChart"></canvas>
+    </div>
+
+    </div>
     `;
 
-    document.getElementById("toggleRevenue").onclick=()=>{
+    document.getElementById("revBtn").onclick=()=>{
         STATE.ui.gmvChartMode="revenue";
-        renderOverview();
+        renderGmvPage();
     };
 
-    document.getElementById("toggleUnits").onclick=()=>{
+    document.getElementById("unitBtn").onclick=()=>{
         STATE.ui.gmvChartMode="units";
-        renderOverview();
+        renderGmvPage();
     };
 
-    const labels=data.chartData.labels;
+    const overview=getGmvOverview();
+
+    const labels=overview.chartData.labels;
 
     let datasets;
 
-    if(STATE.ui.gmvChartMode==="units"){
+    if(STATE.ui.gmvChartMode==="revenue"){
 
         datasets=[
-            {
-                label:"Cancel Units",
-                data:data.chartData.datasets[2].data,
-                borderColor:"#dc2626",
-                tension:0.3
-            },
-            {
-                label:"Return Units",
-                data:data.chartData.datasets[3].data,
-                borderColor:"#f59e0b",
-                tension:0.3
-            }
+
+        {
+            label:"GMV",
+            data:overview.chartData.datasets[0].data,
+            borderColor:"#2563eb",
+            tension:0.3
+        },
+
+        {
+            label:"Cancellations",
+            data:labels.map(()=>todayData.cancelAmount),
+            borderColor:"#dc2626",
+            tension:0.3
+        },
+
+        {
+            label:"Returns",
+            data:labels.map(()=>todayData.returnAmount),
+            borderColor:"#f59e0b",
+            tension:0.3
+        },
+
+        {
+            label:"Net Sales",
+            data:overview.chartData.datasets[1].data,
+            borderColor:"#16a34a",
+            tension:0.3
+        }
+
         ];
 
     }else{
 
         datasets=[
-            {
-                label:"GMV",
-                data:data.chartData.datasets[0].data,
-                borderColor:"#2563eb",
-                tension:0.3
-            },
-            {
-                label:"Net Revenue",
-                data:data.chartData.datasets[1].data,
-                borderColor:"#16a34a",
-                tension:0.3
-            }
+
+        {
+            label:"Gross Units",
+            data:labels.map(()=>todayData.grossUnits),
+            borderColor:"#2563eb",
+            tension:0.3
+        },
+
+        {
+            label:"Cancel Units",
+            data:labels.map(()=>todayData.cancelUnits),
+            borderColor:"#dc2626",
+            tension:0.3
+        },
+
+        {
+            label:"Return Units",
+            data:labels.map(()=>todayData.returnUnits),
+            borderColor:"#f59e0b",
+            tension:0.3
+        },
+
+        {
+            label:"Net Units",
+            data:labels.map(()=>todayData.finalUnits),
+            borderColor:"#16a34a",
+            tension:0.3
+        }
+
         ];
 
     }
 
-    renderLineChart("gmvOverviewChart",labels,datasets);
-}
-
-function renderBrand(){
-    renderTable(getGmvBrandReport(),"brand");
-}
-
-function renderCategory(){
-    renderTable(getGmvCategoryReport(),"category");
-}
-
-function renderFulfillment(){
-    renderTable(getGmvFulfillmentReport(),"fulfillment");
-}
-
-function renderLocation(){
-    renderTable(getGmvLocationReport(),"location");
-}
-
-function renderTable(rows,type){
-
-    const container=document.getElementById("gmv-sub-content");
-
-    let header="";
-    let nameField="";
-
-    if(type==="brand"){header="Brand";nameField="brand";}
-    if(type==="category"){header="Category / Vertical";nameField="category";}
-    if(type==="fulfillment"){header="Fulfillment";nameField="fulfillment";}
-    if(type==="location"){header="Location";nameField="location";}
-
-    container.innerHTML=`
-        <div class="chart-card">
-            <table class="modern-table">
-                <thead>
-                    <tr>
-                        <th>${header}</th>
-                        <th>Final Revenue</th>
-                        <th>Gross Units</th>
-                        <th>Final Units</th>
-                        <th>Cancel Units</th>
-                        <th>Return Units</th>
-                        <th>Cancel %</th>
-                        <th>Return %</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                ${rows.map(r=>`
-                    <tr>
-                        <td>${r[nameField]}</td>
-                        <td>${formatINR(r.finalRevenue)}</td>
-                        <td>${r.grossUnits}</td>
-                        <td>${r.finalUnits}</td>
-                        <td>${r.cancelUnits}</td>
-                        <td>${r.returnUnits}</td>
-                        <td>${percent(r.cancelRate)}</td>
-                        <td>${percent(r.returnRate)}</td>
-                    </tr>
-                `).join("")}
-
-                </tbody>
-            </table>
-        </div>
-    `;
+    renderLineChart("gmvChart",labels,datasets);
 }
