@@ -70,7 +70,7 @@ function renderOverview() {
         </div>
 
         <div style="margin-bottom:12px;">
-            <button id="gmvRevenueBtn" class="ads-tab ${STATE.ui.gmvChartMode==="revenue"?"active":""}">Revenue</button>
+            <button id="gmvRevenueBtn" class="ads-tab ${STATE.ui.gmvChartMode==="revenue"?"active":""}">GMV ₹</button>
             <button id="gmvUnitsBtn" class="ads-tab ${STATE.ui.gmvChartMode==="units"?"active":""}">Units</button>
         </div>
 
@@ -89,57 +89,67 @@ function renderOverview() {
         renderOverview();
     };
 
-    const chartData = buildChartData(data);
-
-    renderLineChart(
-        "gmvOverviewChart",
-        chartData.labels,
-        chartData.datasets
-    );
-}
-
-function buildChartData(data){
-
     const labels = data.chartData.labels;
 
-    if(STATE.ui.gmvChartMode === "units"){
+    let datasets;
 
-        return {
-            labels,
-            datasets:[
-                {
-                    label:"Gross Units",
-                    data: labels.map((_,i)=>data.chartData.datasets[2].data[i] + data.chartData.datasets[3].data[i] + data.chartData.datasets[1].data[i]/1),
-                    borderColor:"#2563eb",
-                    tension:0.3
-                },
-                {
-                    label:"Cancel Units",
-                    data:data.chartData.datasets[2].data,
-                    borderColor:"#dc2626",
-                    tension:0.3
-                },
-                {
-                    label:"Return Units",
-                    data:data.chartData.datasets[3].data,
-                    borderColor:"#f59e0b",
-                    tension:0.3
-                },
-                {
-                    label:"Final Units",
-                    data:labels.map((_,i)=>
-                        (data.chartData.datasets[2].data[i] + data.chartData.datasets[3].data[i]) ?
-                        data.chartData.datasets[2].data[i] : 0
-                    ),
-                    borderColor:"#16a34a",
-                    tension:0.3
-                }
-            ]
-        }
+    if (STATE.ui.gmvChartMode === "units") {
+
+        datasets = [
+            {
+                label: "Gross Units",
+                data: labels.map((_,i)=>
+                    data.chartData.datasets[2].data[i] +
+                    data.chartData.datasets[3].data[i] +
+                    (data.chartData.datasets[1].data[i] ? 0 : 0)
+                ),
+                borderColor:"#2563eb",
+                tension:0.3
+            },
+            {
+                label:"Cancel Units",
+                data:data.chartData.datasets[2].data,
+                borderColor:"#dc2626",
+                tension:0.3
+            },
+            {
+                label:"Return Units",
+                data:data.chartData.datasets[3].data,
+                borderColor:"#f59e0b",
+                tension:0.3
+            },
+            {
+                label:"Final Units",
+                data:labels.map((_,i)=>
+                    data.chartData.datasets[2].data[i] +
+                    data.chartData.datasets[3].data[i] ?
+                    data.chartData.datasets[2].data[i] : 0
+                ),
+                borderColor:"#16a34a",
+                tension:0.3
+            }
+        ];
+
+    } else {
+
+        datasets = [
+            {
+                label:"GMV",
+                data:data.chartData.datasets[0].data,
+                borderColor:"#2563eb",
+                tension:0.3
+            },
+            {
+                label:"Final Revenue",
+                data:data.chartData.datasets[1].data,
+                borderColor:"#16a34a",
+                tension:0.3
+            }
+        ];
 
     }
 
-    return data.chartData;
+    renderLineChart("gmvOverviewChart", labels, datasets);
 }
 
 function renderBrand() {
