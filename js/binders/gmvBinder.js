@@ -1,168 +1,264 @@
 import { STATE } from "../core/stateManager.js";
 import { getGmvOverview } from "../engines/reports/gmvOverviewEngine.js";
 import { getGMVSummary } from "../engines/summary/gmvSummaryEngine.js";
+import { getGmvBrandReport } from "../engines/reports/gmvBrandReportEngine.js";
+import { getGmvCategoryReport } from "../engines/reports/gmvCategoryReportEngine.js";
+import { getGmvFulfillmentReport } from "../engines/reports/gmvFulfillmentReportEngine.js";
+import { getGmvLocationReport } from "../engines/reports/gmvLocationReportEngine.js";
 import { renderLineChart } from "../engines/charts/chartFactory.js";
 
 function inr(n){
-    return "₹"+Number(n||0).toLocaleString("en-IN");
+return "₹ "+Number(n||0).toLocaleString("en-IN");
+}
+
+function percent(v){
+return (v*100).toFixed(2)+"%";
 }
 
 function compare(curr,prev){
-
-    if(!prev) return {txt:"",cls:""};
-
-    const diff=((curr-prev)/prev)*100;
-
-    const arrow=diff>=0?"▲":"▼";
-
-    const cls=diff>=0?"kpi-up":"kpi-down";
-
-    return{
-        txt:`${arrow} ${Math.abs(diff).toFixed(1)}% (From previous period)`,
-        cls
-    };
-
+if(!prev) return {txt:"",cls:""};
+const diff=((curr-prev)/prev)*100;
+return{
+txt:`${diff>=0?"▲":"▼"} ${Math.abs(diff).toFixed(1)}% (From previous period)`,
+cls:diff>=0?"kpi-up":"kpi-down"
+};
 }
 
 export function renderGmvPage(){
 
-    const container=document.getElementById("app-content");
+const container=document.getElementById("app-content");
 
-    if(!STATE.ui.gmvChartMode) STATE.ui.gmvChartMode="revenue";
+if(!STATE.ui.gmvSubPage) STATE.ui.gmvSubPage="overview";
+if(!STATE.ui.gmvChartMode) STATE.ui.gmvChartMode="revenue";
 
-    const today=getGMVSummary();
+container.innerHTML=`
 
-    const prevFilters={...STATE.filters};
+<div class="section">
 
-    const start=new Date(prevFilters.startDate);
-    const end=new Date(prevFilters.endDate);
-    const diff=end-start;
+<div class="section-title">GMV Reports</div>
 
-    const prevEnd=new Date(start);
-    prevEnd.setDate(prevEnd.getDate()-1);
+<div class="ads-tabs">
+<div class="ads-tab ${STATE.ui.gmvSubPage==="overview"?"active":""}" data-tab="overview">Overview</div>
+<div class="ads-tab ${STATE.ui.gmvSubPage==="brand"?"active":""}" data-tab="brand">Brand</div>
+<div class="ads-tab ${STATE.ui.gmvSubPage==="category"?"active":""}" data-tab="category">Category</div>
+<div class="ads-tab ${STATE.ui.gmvSubPage==="fulfillment"?"active":""}" data-tab="fulfillment">Fulfillment</div>
+<div class="ads-tab ${STATE.ui.gmvSubPage==="location"?"active":""}" data-tab="location">Location</div>
+</div>
 
-    const prevStart=new Date(prevEnd);
-    prevStart.setTime(prevEnd.getTime()-diff);
+<div id="gmv-sub-content"></div>
 
-    STATE.filters.startDate=prevStart.toISOString().split("T")[0];
-    STATE.filters.endDate=prevEnd.toISOString().split("T")[0];
+</div>
+`;
 
-    const prev=getGMVSummary();
+document.querySelectorAll(".ads-tab").forEach(tab=>{
+tab.onclick=()=>{
+STATE.ui.gmvSubPage=tab.dataset.tab;
+renderGmvPage();
+};
+});
 
-    STATE.filters=prevFilters;
+if(STATE.ui.gmvSubPage==="overview") renderOverview();
+if(STATE.ui.gmvSubPage==="brand") renderBrand();
+if(STATE.ui.gmvSubPage==="category") renderCategory();
+if(STATE.ui.gmvSubPage==="fulfillment") renderFulfillment();
+if(STATE.ui.gmvSubPage==="location") renderLocation();
 
-    const grossCompare=compare(today.gmv,prev.gmv);
-    const cancelCompare=compare(today.cancelAmount,prev.cancelAmount);
+}
 
-    const afterCancel=today.gmv-today.cancelAmount;
-    const prevAfterCancel=prev.gmv-prev.cancelAmount;
+function renderOverview(){
 
-    const afterCancelCompare=compare(afterCancel,prevAfterCancel);
+const container=document.getElementById("gmv-sub-content");
 
-    const returnCompare=compare(today.returnAmount,prev.returnAmount);
+const summary=getGMVSummary();
+const overview=getGmvOverview();
 
-    const netCompare=compare(today.finalAmount,prev.finalAmount);
+const afterCancel=summary.gmv-summary.cancelAmount;
 
-    container.innerHTML=`
+const prevFilters={...STATE.filters};
 
-    <div class="section">
+const start=new Date(prevFilters.startDate);
+const end=new Date(prevFilters.endDate);
+const diff=end-start;
 
-    <div class="section-title">GMV Performance Summary</div>
+const prevEnd=new Date(start);
+prevEnd.setDate(prevEnd.getDate()-1);
 
-    <div class="kpi-row">
+const prevStart=new Date(prevEnd);
+prevStart.setTime(prevEnd.getTime()-diff);
 
-    <div class="kpi-card">
-    <div class="kpi-label">Gross Sales</div>
-    <div class="kpi-value">${inr(today.gmv)} (${today.grossUnits} units)</div>
-    <div class="kpi-compare ${grossCompare.cls}">${grossCompare.txt}</div>
-    </div>
+STATE.filters.startDate=prevStart.toISOString().split("T")[0];
+STATE.filters.endDate=prevEnd.toISOString().split("T")[0];
 
-    <div class="kpi-card">
-    <div class="kpi-label">Cancellations</div>
-    <div class="kpi-value">${inr(today.cancelAmount)} (${today.cancelUnits} units)</div>
-    <div class="kpi-compare ${cancelCompare.cls}">${cancelCompare.txt}</div>
-    </div>
+const prev=getGMVSummary();
 
-    <div class="kpi-card">
-    <div class="kpi-label">Sales After Cancellations</div>
-    <div class="kpi-value">${inr(afterCancel)} (${today.grossUnits-today.cancelUnits} units)</div>
-    <div class="kpi-compare ${afterCancelCompare.cls}">${afterCancelCompare.txt}</div>
-    </div>
+STATE.filters=prevFilters;
 
-    <div class="kpi-card">
-    <div class="kpi-label">Returns</div>
-    <div class="kpi-value">${inr(today.returnAmount)} (${today.returnUnits} units)</div>
-    <div class="kpi-compare ${returnCompare.cls}">${returnCompare.txt}</div>
-    </div>
+const grossCompare=compare(summary.gmv,prev.gmv);
+const cancelCompare=compare(summary.cancelAmount,prev.cancelAmount);
+const afterCompare=compare(afterCancel,(prev.gmv-prev.cancelAmount));
+const returnCompare=compare(summary.returnAmount,prev.returnAmount);
+const netCompare=compare(summary.finalAmount,prev.finalAmount);
 
-    <div class="kpi-card">
-    <div class="kpi-label">Net Sales</div>
-    <div class="kpi-value">${inr(today.finalAmount)} (${today.finalUnits} units)</div>
-    <div class="kpi-compare ${netCompare.cls}">${netCompare.txt}</div>
-    </div>
+container.innerHTML=`
 
-    </div>
+<div class="kpi-row">
 
-    <div class="toggle-group">
-        <button id="revBtn" class="toggle-btn ${STATE.ui.gmvChartMode==="revenue"?"active":""}">Revenue</button>
-        <button id="unitBtn" class="toggle-btn ${STATE.ui.gmvChartMode==="units"?"active":""}">Units</button>
-    </div>
+<div class="kpi-card">
+<div class="kpi-label">Gross Sales</div>
+<div class="kpi-value">${inr(summary.gmv)} (${summary.grossUnits} units)</div>
+<div class="kpi-compare ${grossCompare.cls}">${grossCompare.txt}</div>
+</div>
 
-    <div class="chart-card">
-        <canvas id="gmvChart"></canvas>
-    </div>
+<div class="kpi-card">
+<div class="kpi-label">Cancellations</div>
+<div class="kpi-value">${inr(summary.cancelAmount)} (${summary.cancelUnits} units)</div>
+<div class="kpi-compare ${cancelCompare.cls}">${cancelCompare.txt}</div>
+</div>
 
-    </div>
-    `;
+<div class="kpi-card">
+<div class="kpi-label">Sales After Cancellations</div>
+<div class="kpi-value">${inr(afterCancel)} (${summary.grossUnits-summary.cancelUnits} units)</div>
+<div class="kpi-compare ${afterCompare.cls}">${afterCompare.txt}</div>
+</div>
 
-    document.getElementById("revBtn").onclick=()=>{
-        STATE.ui.gmvChartMode="revenue";
-        renderGmvPage();
-    };
+<div class="kpi-card">
+<div class="kpi-label">Returns</div>
+<div class="kpi-value">${inr(summary.returnAmount)} (${summary.returnUnits} units)</div>
+<div class="kpi-compare ${returnCompare.cls}">${returnCompare.txt}</div>
+</div>
 
-    document.getElementById("unitBtn").onclick=()=>{
-        STATE.ui.gmvChartMode="units";
-        renderGmvPage();
-    };
+<div class="kpi-card">
+<div class="kpi-label">Net Sales</div>
+<div class="kpi-value">${inr(summary.finalAmount)} (${summary.finalUnits} units)</div>
+<div class="kpi-compare ${netCompare.cls}">${netCompare.txt}</div>
+</div>
 
-    const overview=getGmvOverview();
+</div>
 
-    const labels=overview.chartData.labels;
+<div class="toggle-group">
+<button id="revBtn" class="toggle-btn ${STATE.ui.gmvChartMode==="revenue"?"active":""}">Revenue</button>
+<button id="unitBtn" class="toggle-btn ${STATE.ui.gmvChartMode==="units"?"active":""}">Units</button>
+</div>
 
-    let datasets;
+<div class="chart-card">
+<canvas id="gmvChart"></canvas>
+</div>
+`;
 
-    if(STATE.ui.gmvChartMode==="revenue"){
+document.getElementById("revBtn").onclick=()=>{
+STATE.ui.gmvChartMode="revenue";
+renderOverview();
+};
 
-        const gmv=overview.chartData.datasets[0].data;
-        const net=overview.chartData.datasets[1].data;
+document.getElementById("unitBtn").onclick=()=>{
+STATE.ui.gmvChartMode="units";
+renderOverview();
+};
 
-        const cancel=gmv.map((v,i)=>v-net[i]);
-        const ret=cancel.map(v=>v*0.2);
+const labels=overview.chartData.labels;
 
-        datasets=[
-        {label:"GMV",data:gmv,borderColor:"#2563eb",tension:0.3},
-        {label:"Cancellations",data:cancel,borderColor:"#dc2626",tension:0.3},
-        {label:"Returns",data:ret,borderColor:"#f59e0b",tension:0.3},
-        {label:"Net Sales",data:net,borderColor:"#16a34a",tension:0.3}
-        ];
+const gmv=overview.chartData.datasets[0].data;
+const net=overview.chartData.datasets[1].data;
+const cancelUnits=overview.chartData.datasets[2].data;
+const returnUnits=overview.chartData.datasets[3].data;
 
-    }else{
+const avgPrice=gmv.map((v,i)=>v/(cancelUnits[i]+returnUnits[i]+1));
 
-        const cancel=overview.chartData.datasets[2].data;
-        const ret=overview.chartData.datasets[3].data;
+const cancelAmount=cancelUnits.map((u,i)=>u*avgPrice[i]);
+const returnAmount=returnUnits.map((u,i)=>u*avgPrice[i]);
 
-        const gross=cancel.map((v,i)=>v+ret[i]+10);
-        const net=gross.map((v,i)=>v-cancel[i]-ret[i]);
+const grossUnits=cancelUnits.map((c,i)=>c+returnUnits[i]+1);
+const netUnits=grossUnits.map((g,i)=>g-cancelUnits[i]-returnUnits[i]);
 
-        datasets=[
-        {label:"Gross Units",data:gross,borderColor:"#2563eb",tension:0.3},
-        {label:"Cancel Units",data:cancel,borderColor:"#dc2626",tension:0.3},
-        {label:"Return Units",data:ret,borderColor:"#f59e0b",tension:0.3},
-        {label:"Net Units",data:net,borderColor:"#16a34a",tension:0.3}
-        ];
+let datasets;
 
-    }
+if(STATE.ui.gmvChartMode==="revenue"){
 
-    renderLineChart("gmvChart",labels,datasets);
+datasets=[
+{label:"GMV",data:gmv,borderColor:"#2563eb",tension:0.3},
+{label:"Cancellations",data:cancelAmount,borderColor:"#dc2626",tension:0.3},
+{label:"Returns",data:returnAmount,borderColor:"#f59e0b",tension:0.3},
+{label:"Net Sales",data:net,borderColor:"#16a34a",tension:0.3}
+];
+
+}else{
+
+datasets=[
+{label:"Gross Units",data:grossUnits,borderColor:"#2563eb",tension:0.3},
+{label:"Cancel Units",data:cancelUnits,borderColor:"#dc2626",tension:0.3},
+{label:"Return Units",data:returnUnits,borderColor:"#f59e0b",tension:0.3},
+{label:"Net Units",data:netUnits,borderColor:"#16a34a",tension:0.3}
+];
+
+}
+
+renderLineChart("gmvChart",labels,datasets);
+
+}
+
+function renderBrand(){
+renderTable(getGmvBrandReport(),"brand");
+}
+
+function renderCategory(){
+renderTable(getGmvCategoryReport(),"category");
+}
+
+function renderFulfillment(){
+renderTable(getGmvFulfillmentReport(),"fulfillment");
+}
+
+function renderLocation(){
+renderTable(getGmvLocationReport(),"location");
+}
+
+function renderTable(rows,type){
+
+const container=document.getElementById("gmv-sub-content");
+
+let header="";
+let field="";
+
+if(type==="brand"){header="Brand";field="brand";}
+if(type==="category"){header="Category / Vertical";field="category";}
+if(type==="fulfillment"){header="Fulfillment";field="fulfillment";}
+if(type==="location"){header="Location";field="location";}
+
+container.innerHTML=`
+
+<div class="chart-card">
+<table class="modern-table">
+
+<thead>
+<tr>
+<th>${header}</th>
+<th>Final Revenue</th>
+<th>Gross Units</th>
+<th>Final Units</th>
+<th>Cancel Units</th>
+<th>Return Units</th>
+<th>Cancel %</th>
+<th>Return %</th>
+</tr>
+</thead>
+
+<tbody>
+${rows.map(r=>`
+<tr>
+<td>${r[field]}</td>
+<td>${inr(r.finalRevenue)}</td>
+<td>${r.grossUnits}</td>
+<td>${r.finalUnits}</td>
+<td>${r.cancelUnits}</td>
+<td>${r.returnUnits}</td>
+<td>${percent(r.cancelRate)}</td>
+<td>${percent(r.returnRate)}</td>
+</tr>
+`).join("")}
+</tbody>
+
+</table>
+</div>
+`;
 
 }
